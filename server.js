@@ -12,15 +12,19 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Yöneticiler ve şifreleri
+// Şifreler ve kullanıcı adları Render Environment Variables'dan okunur
+const ADMIN_USERNAME = process.env.ADMIN_USER || "admin1";
+const ADMIN_PASSWORD = process.env.ADMIN_PASS || "1234";
+
 const USERS = {
-    "admin1": "1234",
-    "admin2": "1234"
+    [ADMIN_USERNAME]: ADMIN_PASSWORD,
+    // İstersen ikinci bir kullanıcıyı da Render'dan yönetebilirsin:
+    [process.env.ADMIN_USER_2 || "admin2"]: process.env.ADMIN_PASS_2 || "1234"
 };
 
 // Kullanıcıya özel veritabanı dosyası yolu oluşturan fonksiyon
 function getDBFile(username) {
-    const safeUser = username && USERS[username] ? username : "admin1";
+    const safeUser = username && USERS[username] ? username : ADMIN_USERNAME;
     return path.join(__dirname, `database_${safeUser}.json`);
 }
 
@@ -69,7 +73,7 @@ app.post('/api/login', (req, res) => {
 });
 
 app.get('/api/data', (req, res) => { 
-    const user = req.query.user || "admin1";
+    const user = req.query.user || ADMIN_USERNAME;
     res.json(readDB(user)); 
 });
 
@@ -174,11 +178,11 @@ app.post('/api/reset', (req, res) => {
 
 io.on('connection', (socket) => {
     socket.on('joinRoom', (user) => {
-        socket.join(user || "admin1");
+        socket.join(user || ADMIN_USERNAME);
     });
 
     socket.on('liveUpdate', (data) => {
-        const user = data.user || "admin1";
+        const user = data.user || ADMIN_USERNAME;
         const db = readDB(user);
         db.scores = data.scores;
         db.leaderboard = data.leaderboard;
@@ -188,7 +192,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('aliveUpdate', (data) => {
-        const user = data.user || "admin1";
+        const user = data.user || ADMIN_USERNAME;
         const db = readDB(user);
         db.alive = data.alive;
         writeDB(user, db);
@@ -196,7 +200,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('setSpectate', (data) => {
-        const user = (typeof data === 'object' && data.user) ? data.user : "admin1";
+        const user = (typeof data === 'object' && data.user) ? data.user : ADMIN_USERNAME;
         const teamName = (typeof data === 'object' && data.teamName) ? data.teamName : data;
         const db = readDB(user);
         db.spectating = teamName;
