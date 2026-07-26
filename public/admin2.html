@@ -31,11 +31,11 @@
             <div class="space-y-4 text-left">
                 <div>
                     <label class="block text-xs font-bold text-gray-300 mb-1">Kullanıcı Adı:</label>
-                    <input type="text" id="loginUser" placeholder="Admin" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm outline-none focus:border-amber-500">
+                    <input type="text" id="loginUser" autocomplete="off" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm outline-none focus:border-amber-500">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-300 mb-1">Şifre:</label>
-                    <input type="password" id="loginPass" placeholder="****" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm outline-none focus:border-amber-500">
+                    <input type="password" id="loginPass" autocomplete="new-password" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm outline-none focus:border-amber-500">
                 </div>
                 <button onclick="handleLogin()" class="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl shadow-lg transition-all">GİRİŞ YAP</button>
                 <div id="loginError" class="text-red-500 text-xs text-center font-bold hidden"></div>
@@ -45,7 +45,7 @@
 
     <aside class="w-72 glass-panel flex flex-col z-20 border-r border-amber-900/30 shadow-2xl">
         <div class="p-8 text-center border-b border-amber-900/30">
-            <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-600 tracking-wider">PMGO Admin</h1>
+            <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-600 tracking-wider">NVL Admin</h1>
             <div id="currentUserBadge" class="mt-2 text-[10px] font-bold text-gray-400 uppercase"></div>
             <div class="mt-3 text-[10px] font-black px-3 py-1.5 bg-amber-500/10 text-amber-400 rounded-md border border-amber-500/20 uppercase tracking-widest flex items-center justify-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span> CANLI
@@ -53,9 +53,9 @@
         </div>
         <nav class="p-5 space-y-2.5 flex-1 overflow-y-auto font-bold">
             <button onclick="switchTab('tab-teams')" class="w-full p-3.5 bg-gray-900/60 hover:bg-amber-950/40 rounded-xl text-left transition-all flex items-center gap-3"><span>📝</span> Takım Kayıt</button>
-            <button onclick="switchTab('tab-rosters')" class="w-full p-3.5 bg-gray-900/60 hover:bg-amber-950/40 rounded-xl text-left transition-all flex items-center gap-3 text-amber-300"><span>🛡️</span> Takımlar & Logolar</button>
-            <button onclick="switchTab('tab-spreadsheet')" class="w-full p-3.5 bg-gray-900/60 hover:bg-amber-950/40 rounded-xl text-left transition-all flex items-center gap-3"><span>📊</span> Canlı E-Tablo</button>
-            <button onclick="switchTab('tab-downloads')" class="w-full p-3.5 bg-gray-900/60 hover:bg-amber-950/40 rounded-xl text-left transition-all flex items-center gap-3 text-emerald-400"><span>🖼️</span> Görsel İndir</button>
+            <button onclick="switchTab('tab-rosters')" class="w-full p-3.5 bg-gray-900/60 hover:bg-amber-950/40 rounded-xl text-left transition-all flex items-center gap-3 text-amber-300"><span>🛡️</span> Takımlar</button>
+            <button onclick="switchTab('tab-spreadsheet')" class="w-full p-3.5 bg-gray-900/60 hover:bg-amber-950/40 rounded-xl text-left transition-all flex items-center gap-3"><span>📊</span> E-Tablo</button>
+            <button onclick="switchTab('tab-downloads')" class="w-full p-3.5 bg-gray-900/60 hover:bg-amber-950/40 rounded-xl text-left transition-all flex items-center gap-3 text-emerald-400"><span>🖼️</span> Live,Result İndir</button>
             <button onclick="switchTab('tab-settings')" class="w-full p-3.5 bg-gray-900/60 hover:bg-amber-950/40 rounded-xl text-left transition-all flex items-center gap-3"><span>⚙️</span> Yayın Ayarları</button>
         </nav>
         <div class="p-5 border-t border-amber-900/30 flex flex-col gap-2">
@@ -89,7 +89,7 @@
         <!-- CANLI E-TABLO -->
         <section id="tab-spreadsheet" class="tab-content w-full">
             <div class="mb-6">
-                <h2 class="text-3xl font-black text-white">Canlı Skor Girişi</h2>
+                <h2 class="text-3xl font-black text-white">Puan Tablosu</h2>
                 <p class="text-xs text-gray-400 font-bold mt-1">ℹ️ Her maç için sol tarafa <span class="text-amber-400">Kill</span>, sağ tarafa <span class="text-cyan-400">Sıra</span> değerlerini giriniz.</p>
             </div>
 
@@ -240,7 +240,7 @@
         let currentUser = localStorage.getItem('pmgo_user');
         let socket;
 
-        if (!currentUser || (currentUser !== 'admin1' && currentUser !== 'admin2')) {
+        if (!currentUser || currentUser !== 'adminkensuw') {
             document.getElementById('loginModal').style.display = 'flex';
         } else {
             document.getElementById('loginModal').style.display = 'none';
@@ -281,7 +281,6 @@
 
         function initApp() {
             socket = io();
-            socket.emit('joinRoom', currentUser);
             document.getElementById('currentUserBadge').innerText = `Oturum: ${currentUser}`;
 
             socket.on('liveUpdate', (data) => {
@@ -320,7 +319,7 @@
         }
 
         async function loadDownloadCenter() {
-            const res = await fetch(`/api/data?user=${currentUser}`);
+            const res = await fetch(`/api/data`);
             const data = await res.json();
             currentTeams = data.teams || [];
             matchScores = data.scores || {};
@@ -391,7 +390,7 @@
             <div style="width: 1920px; height: 1080px; background: radial-gradient(circle at 15% 50%, #291b05 0%, #080501 60%), radial-gradient(circle at 85% 50%, #291b05 0%, transparent 60%); background-color: #080501; position: relative; padding: 50px 70px; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; display: flex; flex-direction: column;">
                 <div style="text-align: center; margin-bottom: 40px; z-index: 2;">
                     <div style="font-size: 65px; font-weight: 900; text-transform: uppercase; line-height: 1.1; letter-spacing: 4px; color: white; text-shadow: 0 0 20px rgba(255,255,255,0.6), 0 0 40px rgba(245, 158, 11, 0.4);">
-                        <div>PMGO ORGANIZATION</div><div>${title}</div>
+                        <div>NVL ORGANIZATION</div><div>${title}</div>
                     </div>
                 </div>
                 <div style="flex-grow: 1; border: 3px solid rgba(245,158,11,0.7); box-shadow: 0 0 35px rgba(245,158,11,0.3), inset 0 0 35px rgba(245,158,11,0.1); border-radius: 4px; display: flex; background: rgba(12, 10, 5, 0.85); backdrop-filter: blur(10px); z-index: 2; padding: 25px;">
@@ -421,7 +420,7 @@
 
         function generateMVPImage(el) {
             let html = `<div style="display:flex; flex-direction:column; justify-content:center; height: 100%; box-sizing: border-box;">`;
-            html += `<h1 style="text-align:center; font-size: 80px; color: #f59e0b; margin: 0 0 60px 0; letter-spacing: 6px; font-weight:900;">TOP FRAGGERS</h1>`;
+            html += `<h1 style="text-align:center; font-size: 80px; color: #f59e0b; margin: 0 0 60px 0; letter-spacing: 6px; font-weight:900;">TOP PLAYERS</h1>`;
             html += `<div style="display: flex; justify-content: space-between; align-items: stretch; gap: 50px;">`;
             for(let i=0; i<3; i++) {
                 let m = mvpsData[i] || {name: "TBD", team: "TBD", kills: "0"};
@@ -449,12 +448,12 @@
             for(let i=0; i<3; i++) {
                 newMvps.push({ name: document.getElementById(`mvp-name-${i}`).value, team: document.getElementById(`mvp-team-${i}`).value, kills: document.getElementById(`mvp-kills-${i}`).value });
             }
-            await fetch('/api/mvps', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: currentUser, mvps: newMvps }) });
+            await fetch('/api/mvps', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mvps: newMvps }) });
             alert("MVP'ler kaydedildi!");
         }
 
         async function loadRostersTab() {
-            const res = await fetch(`/api/data?user=${currentUser}`); const data = await res.json();
+            const res = await fetch(`/api/data`); const data = await res.json();
             currentTeams = data.teams; rostersData = data.rosters || {}; logosData = data.logos || {};
             const container = document.getElementById('rostersContainer'); container.innerHTML = '';
             
@@ -509,7 +508,7 @@
             await fetch('/api/teams', { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ user: currentUser, teamList: teamName }) 
+                body: JSON.stringify({ teamList: teamName }) 
             });
             input.value = '';
             isTableLoaded = false;
@@ -529,7 +528,7 @@
                     await fetch('/api/logo', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ user: currentUser, team: teamName, logo: compressedBase64 })
+                        body: JSON.stringify({ team: teamName, logo: compressedBase64 })
                     });
                     loadRostersTab();
                 }; img.src = e.target.result;
@@ -553,19 +552,19 @@
         async function updateRosterData(team) {
             let p = []; for(let i=0; i<5; i++) { let inputEl = document.getElementById(`roster-${team}-${i}`); p.push(inputEl ? inputEl.value : ""); }
             rostersData[team] = p;
-            await fetch('/api/rosters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: currentUser, rosters: rostersData }) });
+            await fetch('/api/rosters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ rosters: rostersData }) });
         }
 
         async function removeTeam(teamName) {
             if(confirm(`"${teamName}" silinsin mi?`)) {
-                await fetch('/api/remove-team', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: currentUser, team: teamName }) });
+                await fetch('/api/remove-team', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ team: teamName }) });
                 isTableLoaded = false;
                 loadRostersTab();
             }
         }
 
         async function loadTableStructure() {
-            const res = await fetch(`/api/data?user=${currentUser}`); const data = await res.json();
+            const res = await fetch(`/api/data`); const data = await res.json();
             currentTeams = data.teams || []; 
             matchScores = data.scores || {}; 
             aliveStatus = data.alive || {}; 
@@ -597,7 +596,7 @@
                         <div class="w-8 h-8 bg-gray-950 border border-gray-800 rounded flex items-center justify-center overflow-hidden shrink-0">${logo ? `<img src="${logo}" class="w-full h-full object-contain">` : ``}</div>
                         <span class="truncate max-w-[150px]">${team}</span>
                     </td>
-                    <td class="px-4 py-4 text-center"><button onclick="setSpectateTeam('${safeTeam}')" class="px-4 py-2 ${isSpec ? 'spectating-active' : 'bg-gray-800 hover:bg-amber-600'} rounded-lg text-xs font-bold text-white">🎥 ${isSpec ? 'YAYINDA' : 'İzle'}</button></td>
+                    <td class="px-4 py-4 text-center"><button onclick="setSpectateTeam('${safeTeam}')" id="spec-btn-${tIndex}" class="px-4 py-2 ${isSpec ? 'spectating-active' : 'bg-gray-800 hover:bg-amber-600'} rounded-lg text-xs font-bold text-white">🎥 ${isSpec ? 'YAYINDA' : 'İzle'}</button></td>
                     ${aliveTd}${statusTd}`;
                 
                 for(let mIndex=0; mIndex<5; mIndex++) {
@@ -620,7 +619,22 @@
 
         function setSpectateTeam(teamName) { 
             currentlySpectating = (currentlySpectating === teamName) ? "" : teamName; 
-            socket.emit('setSpectate', { user: currentUser, teamName: currentlySpectating }); 
+            
+            // Butonların görsel durumunu hemen güncelle
+            currentTeams.forEach((team, idx) => {
+                const btn = document.getElementById(`spec-btn-${idx}`);
+                if(btn) {
+                    if(team === currentlySpectating) {
+                        btn.className = "px-4 py-2 spectating-active rounded-lg text-xs font-bold text-white";
+                        btn.innerHTML = "🎥 YAYINDA";
+                    } else {
+                        btn.className = "px-4 py-2 bg-gray-800 hover:bg-amber-600 rounded-lg text-xs font-bold text-white";
+                        btn.innerHTML = "🎥 İzle";
+                    }
+                }
+            });
+
+            socket.emit('setSpectate', { teamName: currentlySpectating }); 
         }
 
         function triggerEliminatedAlert(team) {
@@ -628,7 +642,7 @@
             let foundTeam = calculateLeaderboard().find(t => t.teamName === team);
             let kills = foundTeam ? foundTeam.kills : 0;
             let score = foundTeam ? foundTeam.score : 0;
-            socket.emit('triggerAlert', { user: currentUser, team: team, kills: kills, score: score });
+            socket.emit('triggerAlert', { team: team, kills: kills, score: score });
         }
 
         function cycleAliveStatus(team, pIdx, tIndex) {
@@ -640,7 +654,7 @@
             if(box) box.className = `w-5 h-7 rounded cursor-pointer border border-black shadow ${next === 3 ? 'bg-green-500' : (next === 2 ? 'bg-yellow-500' : 'bg-red-600')}`;
             let nowDead = aliveStatus[team].every(v => v === 1);
             if (!prevDead && nowDead) triggerEliminatedAlert(team);
-            socket.emit('aliveUpdate', { user: currentUser, alive: aliveStatus });
+            socket.emit('aliveUpdate', { alive: aliveStatus });
         }
 
         function toggleManualStatus(team, tIndex) {
@@ -651,7 +665,7 @@
                 btn.className = `px-3 py-1.5 rounded-lg text-xs font-black ${teamManualStatus[team] ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`;
                 btn.innerText = teamManualStatus[team] ? '🔴 ELENDİ' : '🟢 HAYATTA';
             }
-            socket.emit('manualStatusUpdate', { user: currentUser, manualStatus: teamManualStatus });
+            socket.emit('manualStatusUpdate', { manualStatus: teamManualStatus });
             if (teamManualStatus[team]) triggerEliminatedAlert(team);
             calculateAll();
         }
@@ -661,7 +675,6 @@
             if (!matchScores[team][matchIndex]) matchScores[team][matchIndex] = { kill: '', rank: '' };
             matchScores[team][matchIndex][type] = value; 
             
-            // Sadece toplam puanı anlık güncelle, tabloyu yeniden çizme (odak kaybolmasın)
             const leaderboard = calculateLeaderboard();
             leaderboard.forEach((t) => { 
                 const idx = currentTeams.indexOf(t.teamName); 
@@ -669,7 +682,7 @@
                 if(totalEl) totalEl.innerText = t.score; 
             });
 
-            socket.emit('liveUpdate', { user: currentUser, scores: matchScores, leaderboard, alive: aliveStatus, manualStatus: teamManualStatus, logos: logosData, teams: currentTeams });
+            socket.emit('liveUpdate', { scores: matchScores, leaderboard, alive: aliveStatus, manualStatus: teamManualStatus, logos: logosData, teams: currentTeams });
         }
 
         function calculateLeaderboard() {
@@ -699,11 +712,11 @@
                 const totalEl = document.getElementById(`total-${tIndex}`); 
                 if(totalEl) totalEl.innerText = t.score; 
             });
-            socket.emit('liveUpdate', { user: currentUser, scores: matchScores, leaderboard, alive: aliveStatus, manualStatus: teamManualStatus, logos: logosData, teams: currentTeams });
+            socket.emit('liveUpdate', { scores: matchScores, leaderboard, alive: aliveStatus, manualStatus: teamManualStatus, logos: logosData, teams: currentTeams });
         }
 
         async function loadSettingsData() {
-            const res = await fetch(`/api/data?user=${currentUser}`); const data = await res.json();
+            const res = await fetch(`/api/data`); const data = await res.json();
             document.getElementById('tournamentNameInput').value = data.settings.tournamentName || "PMGO 2026";
             if (data.settings.showAlive !== undefined) document.getElementById('showAliveSelect').value = data.settings.showAlive.toString();
             if (data.settings.showMarquee !== undefined) document.getElementById('showMarqueeSelect').value = data.settings.showMarquee.toString();
@@ -726,7 +739,7 @@
                 await fetch('/api/tournament-logo', { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ user: currentUser, tournamentLogo: tempTournamentLogo }) 
+                    body: JSON.stringify({ tournamentLogo: tempTournamentLogo }) 
                 });
             }
 
@@ -734,7 +747,6 @@
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify({ 
-                    user: currentUser,
                     tournamentName: document.getElementById('tournamentNameInput').value, 
                     currentMatch: combinedMatch, 
                     showAlive: showAliveVal, 
@@ -748,7 +760,7 @@
 
         async function saveTeams() {
             const teamInput = document.getElementById('teamInput').value; if(!teamInput.trim()) return;
-            await fetch('/api/teams', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: currentUser, teamList: teamInput }) });
+            await fetch('/api/teams', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ teamList: teamInput }) });
             document.getElementById('teamInput').value = ''; 
             isTableLoaded = false;
             switchTab('tab-spreadsheet');
@@ -756,11 +768,7 @@
 
         async function resetSystem() { 
             if(confirm("Sıfırlansın mı?")) { 
-                await fetch('/api/reset', { 
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user: currentUser })
-                }); 
+                await fetch('/api/reset', { method: 'POST' }); 
                 location.reload(); 
             } 
         }
