@@ -31,7 +31,7 @@
             <div class="space-y-4 text-left">
                 <div>
                     <label class="block text-xs font-bold text-gray-300 mb-1">Kullanıcı Adı:</label>
-                    <input type="text" id="loginUser" placeholder="admin1 veya admin2" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm outline-none focus:border-amber-500">
+                    <input type="text" id="loginUser" placeholder="Admin" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm outline-none focus:border-amber-500">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-300 mb-1">Şifre:</label>
@@ -240,7 +240,6 @@
         let currentUser = localStorage.getItem('pmgo_user');
         let socket;
 
-        // Eğer kullanıcı daha önce giriş yapmamışsa modalı açık tut, yapıldıysa gizle
         if (!currentUser || (currentUser !== 'admin1' && currentUser !== 'admin2')) {
             document.getElementById('loginModal').style.display = 'flex';
         } else {
@@ -291,9 +290,6 @@
                 if(data.alive) aliveStatus = data.alive;
                 if(data.manualStatus) teamManualStatus = data.manualStatus;
                 if(data.logos) logosData = { ...logosData, ...data.logos };
-                if(document.getElementById('tab-spreadsheet').classList.contains('active')) {
-                    loadTable();
-                }
             });
 
             switchTab('tab-teams');
@@ -305,11 +301,19 @@
         let tempTournamentLogo = "";
         let showAliveGlobal = true;
         let showMarqueeGlobal = true;
+        let isTableLoaded = false;
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            if(tabId === 'tab-spreadsheet') loadTable();
+            if(tabId === 'tab-spreadsheet') {
+                if(!isTableLoaded) {
+                    loadTableStructure();
+                    isTableLoaded = true;
+                } else {
+                    calculateAll();
+                }
+            }
             if(tabId === 'tab-rosters') loadRostersTab();
             if(tabId === 'tab-downloads') loadDownloadCenter();
             if(tabId === 'tab-settings') loadSettingsData();
@@ -508,6 +512,7 @@
                 body: JSON.stringify({ user: currentUser, teamList: teamName }) 
             });
             input.value = '';
+            isTableLoaded = false;
             loadRostersTab();
             alert(`"${teamName}" başarıyla eklendi!`);
         }
@@ -554,13 +559,19 @@
         async function removeTeam(teamName) {
             if(confirm(`"${teamName}" silinsin mi?`)) {
                 await fetch('/api/remove-team', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: currentUser, team: teamName }) });
+                isTableLoaded = false;
                 loadRostersTab();
             }
         }
 
-        async function loadTable() {
+        async function loadTableStructure() {
             const res = await fetch(`/api/data?user=${currentUser}`); const data = await res.json();
-            currentTeams = data.teams; matchScores = data.scores || {}; aliveStatus = data.alive || {}; teamManualStatus = data.manualStatus || {}; logosData = data.logos || {}; currentlySpectating = data.spectating || "";
+            currentTeams = data.teams || []; 
+            matchScores = data.scores || {}; 
+            aliveStatus = data.alive || {}; 
+            teamManualStatus = data.manualStatus || {}; 
+            logosData = data.logos || {}; 
+            currentlySpectating = data.spectating || "";
             showAliveGlobal = data.settings && data.settings.showAlive !== undefined ? data.settings.showAlive : true;
             
             document.getElementById('thAliveCol').style.display = showAliveGlobal ? '' : 'none';
@@ -595,21 +606,21 @@
                     
                     row += `
                     <td class="px-2 py-4 text-center ${bgCol} border-l border-gray-800">
-                        <input type="number" value="${match.kill}" oninput="handleInput('${safeTeam}', ${mIndex}, 'kill', this.value)" placeholder="Kill" class="w-14 bg-gray-950 border border-amber-500/40 focus:border-amber-400 rounded text-center py-1.5 text-amber-300 font-bold text-sm outline-none">
+                        <input type="number" id="kill-${tIndex}-${mIndex}" value="${match.kill}" oninput="handleInput('${safeTeam}', ${tIndex}, ${mIndex}, 'kill', this.value)" placeholder="Kill" class="w-14 bg-gray-950 border border-amber-500/40 focus:border-amber-400 rounded text-center py-1.5 text-amber-300 font-bold text-sm outline-none">
                     </td>
                     <td class="px-2 py-4 text-center ${bgCol}">
-                        <input type="number" value="${match.rank}" oninput="handleInput('${safeTeam}', ${mIndex}, 'rank', this.value)" placeholder="Sıra" class="w-14 bg-gray-950 border border-cyan-500/40 focus:border-cyan-400 rounded text-center py-1.5 text-cyan-300 font-bold text-sm outline-none">
+                        <input type="number" id="rank-${tIndex}-${mIndex}" value="${match.rank}" oninput="handleInput('${safeTeam}', ${tIndex}, ${mIndex}, 'rank', this.value)" placeholder="Sıra" class="w-14 bg-gray-950 border border-cyan-500/40 focus:border-cyan-400 rounded text-center py-1.5 text-cyan-300 font-bold text-sm outline-none">
                     </td>`;
                 }
                 row += `<td class="px-6 py-4 text-center font-black text-2xl text-amber-400 border-l border-gray-800" id="total-${tIndex}">0</td></tr>`;
                 tbody.innerHTML += row;
-            }); calculateAll();
+            }); 
+            calculateAll();
         }
 
         function setSpectateTeam(teamName) { 
             currentlySpectating = (currentlySpectating === teamName) ? "" : teamName; 
             socket.emit('setSpectate', { user: currentUser, teamName: currentlySpectating }); 
-            loadTable(); 
         }
 
         function triggerEliminatedAlert(team) {
@@ -645,10 +656,20 @@
             calculateAll();
         }
 
-        function handleInput(team, matchIndex, type, value) {
+        function handleInput(team, tIndex, matchIndex, type, value) {
             if (!matchScores[team]) { matchScores[team] = []; for(let i=0; i<5; i++) matchScores[team].push({ kill: '', rank: '' }); }
             if (!matchScores[team][matchIndex]) matchScores[team][matchIndex] = { kill: '', rank: '' };
-            matchScores[team][matchIndex][type] = value; calculateAll();
+            matchScores[team][matchIndex][type] = value; 
+            
+            // Sadece toplam puanı anlık güncelle, tabloyu yeniden çizme (odak kaybolmasın)
+            const leaderboard = calculateLeaderboard();
+            leaderboard.forEach((t) => { 
+                const idx = currentTeams.indexOf(t.teamName); 
+                const totalEl = document.getElementById(`total-${idx}`); 
+                if(totalEl) totalEl.innerText = t.score; 
+            });
+
+            socket.emit('liveUpdate', { user: currentUser, scores: matchScores, leaderboard, alive: aliveStatus, manualStatus: teamManualStatus, logos: logosData, teams: currentTeams });
         }
 
         function calculateLeaderboard() {
@@ -673,7 +694,11 @@
 
         function calculateAll() {
             const leaderboard = calculateLeaderboard();
-            leaderboard.forEach((t) => { const tIndex = currentTeams.indexOf(t.teamName); const totalEl = document.getElementById(`total-${tIndex}`); if(totalEl) totalEl.innerText = t.score; });
+            leaderboard.forEach((t) => { 
+                const tIndex = currentTeams.indexOf(t.teamName); 
+                const totalEl = document.getElementById(`total-${tIndex}`); 
+                if(totalEl) totalEl.innerText = t.score; 
+            });
             socket.emit('liveUpdate', { user: currentUser, scores: matchScores, leaderboard, alive: aliveStatus, manualStatus: teamManualStatus, logos: logosData, teams: currentTeams });
         }
 
@@ -724,7 +749,9 @@
         async function saveTeams() {
             const teamInput = document.getElementById('teamInput').value; if(!teamInput.trim()) return;
             await fetch('/api/teams', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: currentUser, teamList: teamInput }) });
-            document.getElementById('teamInput').value = ''; calculateAll(); switchTab('tab-spreadsheet');
+            document.getElementById('teamInput').value = ''; 
+            isTableLoaded = false;
+            switchTab('tab-spreadsheet');
         }
 
         async function resetSystem() { 

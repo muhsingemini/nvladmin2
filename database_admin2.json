@@ -24,7 +24,7 @@
   "scores": {
     "MXS ACADEMY": [
       {
-        "rank": "1",
+        "rank": "",
         "kill": ""
       },
       {
@@ -46,7 +46,7 @@
     ],
     "DYZ ESPORT": [
       {
-        "rank": "2",
+        "rank": "",
         "kill": ""
       },
       {
@@ -68,7 +68,7 @@
     ],
     "ÇKZ E-SPORTS": [
       {
-        "rank": "3",
+        "rank": "",
         "kill": ""
       },
       {
@@ -466,24 +466,24 @@
   "leaderboard": [
     {
       "teamName": "MXS ACADEMY",
-      "score": 10,
+      "score": 0,
       "kills": 0,
-      "wins": 1,
-      "placeScore": 10
+      "wins": 0,
+      "placeScore": 0
     },
     {
       "teamName": "DYZ ESPORT",
-      "score": 6,
+      "score": 0,
       "kills": 0,
       "wins": 0,
-      "placeScore": 6
+      "placeScore": 0
     },
     {
       "teamName": "ÇKZ E-SPORTS",
-      "score": 5,
+      "score": 0,
       "kills": 0,
       "wins": 0,
-      "placeScore": 5
+      "placeScore": 0
     },
     {
       "teamName": "İOS E-SPORTS",

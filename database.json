@@ -68,7 +68,7 @@
     ],
     "ÇKZ E-SPORTS": [
       {
-        "rank": "3",
+        "rank": "",
         "kill": ""
       },
       {
@@ -480,10 +480,10 @@
     },
     {
       "teamName": "ÇKZ E-SPORTS",
-      "score": 5,
+      "score": 0,
       "kills": 0,
       "wins": 0,
-      "placeScore": 5
+      "placeScore": 0
     },
     {
       "teamName": "İOS E-SPORTS",
@@ -899,7 +899,7 @@
   "settings": {
     "tournamentName": "PMGO 2026 GRAND FINALS",
     "currentMatch": "MATCH 1 / ERANGEL",
-    "showAlive": true,
+    "showAlive": false,
     "showMarquee": true
   }
 }
