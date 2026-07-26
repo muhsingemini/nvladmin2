@@ -1,0 +1,19 @@
+{
+  "teams": [],
+  "scores": {},
+  "leaderboard": [],
+  "spectating": null,
+  "mvps": [],
+  "slots": {},
+  "rosters": {},
+  "logos": {},
+  "alive": {},
+  "defaultLogo": "",
+  "tournamentLogo": "",
+  "settings": {
+    "tournamentName": "PMGO 2026 GRAND FINALS",
+    "currentMatch": "MATCH 1 / ERANGEL",
+    "showAlive": true,
+    "showMarquee": true
+  }
+}

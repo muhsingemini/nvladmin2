@@ -1,1291 +1,742 @@
 <!DOCTYPE html>
-
 <html lang="tr">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>NVL Pubg Yönetim Paneli - Sade Takım Ekleme</title>
-
+    <title>NVL Pubg Yönetim Paneli</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
     <script src="/socket.io/socket.io.js"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;900&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
-
     <style>
-
         body { background-color: #050b14; font-family: 'Inter', sans-serif; background-image: radial-gradient(circle at top right, #1e1b04, #050b14); z-index: 1; }
-
         .glass-panel { background: rgba(15, 15, 10, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(245,158,11,0.15); }
-
         .tab-content { display: none; opacity: 0; }
-
         .tab-content.active { display: block; animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
         @keyframes slideIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-
         input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-
         ::-webkit-scrollbar-track { background: #050b14; }
-
         ::-webkit-scrollbar-thumb { background: #f59e0b; border-radius: 4px; }
-
         .spectating-active { background-color: #d97706 !important; border-color: #f59e0b !important; box-shadow: 0 0 15px #f59e0b; }
-
     </style>
-
 </head>
-
 <body class="text-gray-200 h-screen flex overflow-hidden">
 
-
+    <!-- GİRİŞ EKRANI MODALI -->
+    <div id="loginModal" class="fixed inset-0 z-50 bg-[#050b14]/95 flex items-center justify-center">
+        <div class="glass-panel p-8 rounded-2xl w-96 shadow-2xl space-y-6 text-center">
+            <h2 class="text-3xl font-black text-amber-400 tracking-wider">YÖNETİCİ GİRİŞİ</h2>
+            <p class="text-xs text-gray-400">Verilerinizin karışmaması için giriş yapın.</p>
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-1">Kullanıcı Adı:</label>
+                    <input type="text" id="loginUser" placeholder="admin1 veya admin2" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-1">Şifre:</label>
+                    <input type="password" id="loginPass" placeholder="****" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm outline-none focus:border-amber-500">
+                </div>
+                <button onclick="handleLogin()" class="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl shadow-lg transition-all">GİRİŞ YAP</button>
+                <div id="loginError" class="text-red-500 text-xs text-center font-bold hidden"></div>
+            </div>
+        </div>
+    </div>
 
     <aside class="w-72 glass-panel flex flex-col z-20 border-r border-amber-900/30 shadow-2xl">
-
         <div class="p-8 text-center border-b border-amber-900/30">
-
             <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-600 tracking-wider">PMGO Admin</h1>
-
+            <div id="currentUserBadge" class="mt-2 text-[10px] font-bold text-gray-400 uppercase"></div>
             <div class="mt-3 text-[10px] font-black px-3 py-1.5 bg-amber-500/10 text-amber-400 rounded-md border border-amber-500/20 uppercase tracking-widest flex items-center justify-center gap-2">
-
                 <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span> CANLI
-
             </div>
-
         </div>
-
         <nav class="p-5 space-y-2.5 flex-1 overflow-y-auto font-bold">
-
             <button onclick="switchTab('tab-teams')" class="w-full p-3.5 bg-gray-900/60 hover:bg-amber-950/40 rounded-xl text-left transition-all flex items-center gap-3"><span>📝</span> Takım Kayıt</button>
-
             <button onclick="switchTab('tab-rosters')" class="w-full p-3.5 bg-gray-900/60 hover:bg-amber-950/40 rounded-xl text-left transition-all flex items-center gap-3 text-amber-300"><span>🛡️</span> Takımlar & Logolar</button>
-
             <button onclick="switchTab('tab-spreadsheet')" class="w-full p-3.5 bg-gray-900/60 hover:bg-amber-950/40 rounded-xl text-left transition-all flex items-center gap-3"><span>📊</span> Canlı E-Tablo</button>
-
             <button onclick="switchTab('tab-downloads')" class="w-full p-3.5 bg-gray-900/60 hover:bg-amber-950/40 rounded-xl text-left transition-all flex items-center gap-3 text-emerald-400"><span>🖼️</span> Görsel İndir</button>
-
             <button onclick="switchTab('tab-settings')" class="w-full p-3.5 bg-gray-900/60 hover:bg-amber-950/40 rounded-xl text-left transition-all flex items-center gap-3"><span>⚙️</span> Yayın Ayarları</button>
-
         </nav>
-
-        <div class="p-5 border-t border-amber-900/30">
-
+        <div class="p-5 border-t border-amber-900/30 flex flex-col gap-2">
+            <button onclick="logout()" class="w-full p-3 bg-gray-800 hover:bg-gray-700 rounded-xl text-gray-200 font-bold transition-all text-sm">🔒 Çıkış Yap</button>
             <button onclick="resetSystem()" class="w-full p-3 bg-red-950 hover:bg-red-600 rounded-xl text-red-200 font-bold transition-all text-sm">⚠️ Sistemi Sıfırla</button>
-
         </div>
-
     </aside>
 
-
-
     <main class="flex-1 p-10 overflow-y-auto relative z-10 bg-[#050b14]">
-
         <section id="tab-teams" class="tab-content active max-w-3xl mx-auto">
-
             <h2 class="text-4xl font-black mb-2 text-white">Takım Havuzu</h2>
-
             <div class="glass-panel p-8 rounded-2xl shadow-2xl space-y-4">
-
                 <textarea id="teamInput" rows="10" class="w-full bg-gray-950/80 border border-gray-800 rounded-xl p-5 outline-none text-lg text-white font-mono" placeholder="S2G Esports&#10;Fire Flux"></textarea>
-
                 <button onclick="saveTeams()" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-white font-black text-lg rounded-xl transition-all shadow-lg">TOPLU TAKIMLARI KAYDET</button>
-
             </div>
-
         </section>
-
-
 
         <!-- TAKIM YÖNETİMİ & LOGOLAR -->
-
         <section id="tab-rosters" class="tab-content max-w-5xl mx-auto">
-
             <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-
                 <h2 class="text-4xl font-black text-white">Takım Yönetimi & Logolar</h2>
-
                 <div class="flex gap-2 w-full md:w-auto">
-
                     <input type="text" id="singleTeamInput" placeholder="Yeni Takım Adı..." class="bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-sm text-white font-bold outline-none focus:border-amber-500">
-
                     <button onclick="addSingleTeam()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-sm transition-all shadow-lg shrink-0">+ Takım Ekle</button>
-
                 </div>
-
             </div>
-
-
 
             <div id="rostersContainer" class="space-y-6"></div>
-
         </section>
-
-
 
         <!-- CANLI E-TABLO -->
-
         <section id="tab-spreadsheet" class="tab-content w-full">
-
             <div class="mb-6">
-
                 <h2 class="text-3xl font-black text-white">Canlı Skor Girişi</h2>
-
                 <p class="text-xs text-gray-400 font-bold mt-1">ℹ️ Her maç için sol tarafa <span class="text-amber-400">Kill</span>, sağ tarafa <span class="text-cyan-400">Sıra</span> değerlerini giriniz.</p>
-
             </div>
-
-
 
             <div class="glass-panel rounded-xl overflow-x-auto shadow-2xl">
-
                 <table class="w-full text-sm text-left whitespace-nowrap">
-
                     <thead class="bg-gray-950/95 border-b border-gray-800 text-gray-300 uppercase tracking-wider text-xs">
-
                         <tr>
-
                             <th class="px-6 py-4 font-black w-56" rowspan="2">Takım Adı</th>
-
                             <th class="px-4 py-4 text-center w-32" rowspan="2">Yayın Kontrol</th>
-
                             <th id="thAliveCol" class="px-4 py-4 text-center w-36" rowspan="2">Oyuncu Durumu</th>
-
                             <th id="thStatusCol" class="px-4 py-4 text-center w-32" rowspan="2">Takım Durumu</th>
-
-                           
-
+                            
                             <th class="px-3.5 py-3 text-center bg-amber-950/20 border-l border-gray-800 font-black text-amber-400" colspan="2">MAÇ 1</th>
-
                             <th class="px-3.5 py-3 text-center bg-gray-900/30 border-l border-gray-800 font-black text-amber-400" colspan="2">MAÇ 2</th>
-
                             <th class="px-3.5 py-3 text-center bg-amber-950/20 border-l border-gray-800 font-black text-amber-400" colspan="2">MAÇ 3</th>
-
                             <th class="px-3.5 py-3 text-center bg-gray-900/30 border-l border-gray-800 font-black text-amber-400" colspan="2">MAÇ 4</th>
-
                             <th class="px-3.5 py-3 text-center bg-amber-950/20 border-l border-gray-800 font-black text-amber-400" colspan="2">MAÇ 5</th>
-
-                           
-
+                            
                             <th class="px-6 py-4 text-center text-amber-400 font-black border-l border-gray-800" rowspan="2">TOPLAM</th>
-
                         </tr>
-
                         <tr class="bg-gray-950/60 text-[10px] text-gray-400 border-b border-gray-800">
-
                             <th class="py-2 text-center text-amber-400 bg-amber-950/10 border-l border-gray-800 w-16">KILL</th>
-
                             <th class="py-2 text-center text-cyan-400 bg-amber-950/10 w-16">SIRA</th>
-
                             <th class="py-2 text-center text-amber-400 bg-gray-900/20 border-l border-gray-800 w-16">KILL</th>
-
                             <th class="py-2 text-center text-cyan-400 bg-gray-900/20 w-16">SIRA</th>
-
                             <th class="py-2 text-center text-amber-400 bg-amber-950/10 border-l border-gray-800 w-16">KILL</th>
-
                             <th class="py-2 text-center text-cyan-400 bg-amber-950/10 w-16">SIRA</th>
-
                             <th class="py-2 text-center text-amber-400 bg-gray-900/20 border-l border-gray-800 w-16">KILL</th>
-
                             <th class="py-2 text-center text-cyan-400 bg-gray-900/20 w-16">SIRA</th>
-
                             <th class="py-2 text-center text-amber-400 bg-amber-950/10 border-l border-gray-800 w-16">KILL</th>
-
                             <th class="py-2 text-center text-cyan-400 bg-amber-950/10 w-16">SIRA</th>
-
                         </tr>
-
                     </thead>
-
                     <tbody id="scoreTableBody" class="divide-y divide-gray-900"></tbody>
-
                 </table>
-
             </div>
-
         </section>
-
-
 
         <section id="tab-downloads" class="tab-content max-w-5xl mx-auto">
-
             <h2 class="text-4xl font-black mb-2 text-white">Görsel İndirme Merkezi</h2>
-
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-
                 <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between">
-
                     <h3 class="text-lg font-black text-amber-400 mb-2">📊 LiveScore</h3>
-
                     <button onclick="downloadImage('render-livescore', 'PMGO_Livescore.png')" class="w-full py-2.5 bg-gradient-to-r from-amber-600 to-yellow-600 text-white font-black rounded-xl text-xs">📸 İndir</button>
-
                 </div>
-
                 <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between">
-
                     <h3 class="text-lg font-black text-emerald-400 mb-2">🏆 Result</h3>
-
                     <button onclick="downloadImage('render-result', 'PMGO_Result.png')" class="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black rounded-xl text-xs">📸 İndir</button>
-
                 </div>
-
                 <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between">
-
                     <h3 class="text-lg font-black text-purple-400 mb-2">🎰 Slot Tablosu</h3>
-
                     <button onclick="downloadImage('render-slots', 'PMGO_Slot_Table.png')" class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black rounded-xl text-xs">📸 İndir</button>
-
                 </div>
-
                 <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between">
-
                     <h3 class="text-lg font-black text-cyan-400 mb-2">⭐ MVP Kartı</h3>
-
                     <button onclick="downloadImage('render-mvp', 'PMGO_MVP.png')" class="w-full py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-black rounded-xl text-xs">📸 İndir</button>
-
                 </div>
-
             </div>
 
-
-
             <div class="glass-panel p-6 rounded-2xl mb-8">
-
                 <h3 class="text-xl font-black text-purple-400 mb-2">💬 WhatsApp Kalan Takımlar (Slot 21+)</h3>
-
                 <div class="flex gap-3">
-
                     <textarea id="whatsappSlotText" readonly rows="3" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-xs text-gray-300 font-mono"></textarea>
-
                     <button onclick="copyWhatsAppSlots()" class="px-6 bg-purple-600 hover:bg-purple-500 font-bold rounded-xl text-sm text-white">Kopyala</button>
-
                 </div>
-
             </div>
-
-
 
             <div class="glass-panel p-6 rounded-2xl mb-8">
-
                 <h3 class="text-xl font-black text-amber-400 mb-4">⭐ MVP Düzenleme (Top 3)</h3>
-
                 <div id="mvpInputs" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4"></div>
-
                 <button onclick="saveMVPs()" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 font-bold rounded-xl text-sm">MVP Kaydet</button>
-
             </div>
-
         </section>
-
-
 
         <div id="render-container" style="position: fixed; left: -9999px; top: 0; pointer-events: none; opacity: 0;">
-
             <div id="render-livescore" style="width: 1920px; height: 1080px; box-sizing: border-box;"></div>
-
             <div id="render-result" style="width: 1920px; height: 1080px; box-sizing: border-box;"></div>
-
             <div id="render-slots" style="width: 1920px; height: 1080px; box-sizing: border-box;"></div>
-
             <div id="render-mvp" style="width: 1920px; height: 1080px; box-sizing: border-box;"></div>
-
         </div>
 
-
-
         <section id="tab-settings" class="tab-content max-w-xl mx-auto">
-
             <h2 class="text-4xl font-black mb-2 text-white">Yayın Ayarları</h2>
-
             <div class="glass-panel p-8 rounded-2xl shadow-2xl space-y-6">
-
                 <div>
-
                     <label class="block text-sm font-bold text-gray-300 mb-2">Turnuva Adı:</label>
-
                     <input type="text" id="tournamentNameInput" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-4 text-white font-bold outline-none focus:border-amber-500">
-
                 </div>
-
-
 
                 <div class="bg-gray-950/70 p-5 rounded-xl border border-gray-800">
-
                     <label class="block text-sm font-bold text-amber-400 mb-2">🏆 Turnuva Logosu (Sol Alt):</label>
-
                     <div class="flex items-center gap-4">
-
                         <div id="tournamentLogoPreview" class="w-14 h-14 bg-gray-900 border border-gray-800 rounded-lg flex items-center justify-center overflow-hidden shrink-0">
-
                             <span class="text-[10px] text-gray-500 font-bold">Yok</span>
-
                         </div>
-
                         <input type="file" accept="image/*" onchange="uploadTournamentLogo(event)" class="text-xs text-gray-300 file:py-2 file:px-4 file:rounded-xl file:bg-amber-600 file:text-white cursor-pointer w-full">
-
                     </div>
-
                 </div>
 
-
-
                 <div class="bg-gray-950/70 p-5 rounded-xl border border-gray-800 flex items-center justify-between">
-
                     <div>
-
                         <label class="block text-sm font-bold text-amber-400">⚡ Canlı Hayatta Kalma (Alive) Durumu:</label>
-
                     </div>
-
                     <select id="showAliveSelect" class="bg-gray-900 border border-gray-800 rounded-xl p-3 text-white font-bold text-sm outline-none cursor-pointer">
-
                         <option value="true">AÇIK</option>
-
                         <option value="false">KAPALI</option>
-
                     </select>
-
                 </div>
-
-
 
                 <div class="bg-gray-950/70 p-5 rounded-xl border border-gray-800 flex items-center justify-between">
-
                     <div>
-
                         <label class="block text-sm font-bold text-amber-400">📜 Alttaki Kayan Banner (Marquee):</label>
-
                     </div>
-
                     <select id="showMarqueeSelect" class="bg-gray-900 border border-gray-800 rounded-xl p-3 text-white font-bold text-sm outline-none cursor-pointer">
-
                         <option value="true">AÇIK</option>
-
                         <option value="false">KAPALI</option>
-
                     </select>
-
                 </div>
-
-
 
                 <div class="grid grid-cols-2 gap-4">
-
                     <div>
-
                         <label class="block text-sm font-bold text-gray-300 mb-2">Maç Numarası:</label>
-
                         <select id="matchNumSelect" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-4 text-white font-bold outline-none cursor-pointer">
-
                             <option value="MATCH 1">MATCH 1</option>
-
                             <option value="MATCH 2">MATCH 2</option>
-
                             <option value="MATCH 3">MATCH 3</option>
-
                             <option value="MATCH 4">MATCH 4</option>
-
                             <option value="MATCH 5">MATCH 5</option>
-
                         </select>
-
                     </div>
-
                     <div>
-
                         <label class="block text-sm font-bold text-gray-300 mb-2">Harita Seçimi:</label>
-
                         <select id="mapNameSelect" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-4 text-white font-bold outline-none cursor-pointer">
-
                             <option value="ERANGEL">ERANGEL</option>
-
                             <option value="MIRAMAR">MIRAMAR</option>
-
                             <option value="SANHOK">SANHOK</option>
-
                             <option value="VIKENDI">VIKENDI</option>
-
                             <option value="LIVIK">LIVIK</option>
-
                         </select>
-
                     </div>
-
                 </div>
-
                 <button onclick="saveSettings()" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-white font-black text-lg rounded-xl shadow-lg transition-all">AYARLARI UYGULA</button>
-
             </div>
-
         </section>
-
     </main>
 
-
-
     <script>
+        let currentUser = localStorage.getItem('pmgo_user');
+        let socket;
 
-        const socket = io();
+        // Eğer kullanıcı daha önce giriş yapmamışsa modalı açık tut, yapıldıysa gizle
+        if (!currentUser || (currentUser !== 'admin1' && currentUser !== 'admin2')) {
+            document.getElementById('loginModal').style.display = 'flex';
+        } else {
+            document.getElementById('loginModal').style.display = 'none';
+            initApp();
+        }
+
+        async function handleLogin() {
+            const u = document.getElementById('loginUser').value.trim();
+            const p = document.getElementById('loginPass').value.trim();
+            const err = document.getElementById('loginError');
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    localStorage.setItem('pmgo_user', data.username);
+                    currentUser = data.username;
+                    document.getElementById('loginModal').style.display = 'none';
+                    initApp();
+                } else {
+                    err.innerText = data.message;
+                    err.classList.remove('hidden');
+                }
+            } catch(e) {
+                err.innerText = "Bağlantı hatası!";
+                err.classList.remove('hidden');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('pmgo_user');
+            location.reload();
+        }
+
+        function initApp() {
+            socket = io();
+            socket.emit('joinRoom', currentUser);
+            document.getElementById('currentUserBadge').innerText = `Oturum: ${currentUser}`;
+
+            socket.on('liveUpdate', (data) => {
+                if(data.scores) matchScores = data.scores;
+                if(data.teams) currentTeams = data.teams;
+                if(data.alive) aliveStatus = data.alive;
+                if(data.manualStatus) teamManualStatus = data.manualStatus;
+                if(data.logos) logosData = { ...logosData, ...data.logos };
+                if(document.getElementById('tab-spreadsheet').classList.contains('active')) {
+                    loadTable();
+                }
+            });
+
+            switchTab('tab-teams');
+        }
 
         const placementPoints = { 1: 10, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1, 8: 1 };
-
         let currentTeams = [], matchScores = {}, mvpsData = [], rostersData = {}, logosData = {}, aliveStatus = {}, teamManualStatus = {}, currentlySpectating = "";
-
         let activeSubMenu = {};
-
         let tempTournamentLogo = "";
-
         let showAliveGlobal = true;
-
         let showMarqueeGlobal = true;
 
-
-
         function switchTab(tabId) {
-
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-
             document.getElementById(tabId).classList.add('active');
-
             if(tabId === 'tab-spreadsheet') loadTable();
-
             if(tabId === 'tab-rosters') loadRostersTab();
-
             if(tabId === 'tab-downloads') loadDownloadCenter();
-
             if(tabId === 'tab-settings') loadSettingsData();
-
         }
-
-
 
         async function loadDownloadCenter() {
-
-            const res = await fetch('/api/data');
-
+            const res = await fetch(`/api/data?user=${currentUser}`);
             const data = await res.json();
-
             currentTeams = data.teams || [];
-
             matchScores = data.scores || {};
-
             logosData = data.logos || {};
-
             mvpsData = data.mvps || [];
-
             copyWhatsAppSlots(false);
 
-
-
             const mvpContainer = document.getElementById('mvpInputs');
-
             mvpContainer.innerHTML = '';
-
             for(let i=0; i<3; i++) {
-
                 const m = mvpsData[i] || { name: '', team: '', kills: '' };
-
                 mvpContainer.innerHTML += `
-
                     <div class="bg-gray-950 p-4 rounded-xl border border-gray-800 space-y-2">
-
                         <div class="text-xs font-bold text-amber-400">#${i+1} MVP</div>
-
                         <input type="text" placeholder="Oyuncu Adı" id="mvp-name-${i}" value="${m.name}" class="w-full bg-gray-900 p-2 rounded text-xs text-white border border-gray-800">
-
                         <input type="text" placeholder="Takım" id="mvp-team-${i}" value="${m.team}" class="w-full bg-gray-900 p-2 rounded text-xs text-white border border-gray-800">
-
                         <input type="text" placeholder="Kill" id="mvp-kills-${i}" value="${m.kills}" class="w-full bg-gray-900 p-2 rounded text-xs text-white border border-gray-800">
-
                     </div>
-
                 `;
-
             }
-
         }
-
-
 
         function copyWhatsAppSlots(autoCopy = true) {
-
             let text = "Kalan Takımlar (Slot 21 ve Sonrası):\n\n";
-
             if(currentTeams.length > 20) {
-
                 currentTeams.slice(20).forEach((t, i) => { text += `${i + 21}. ${t}\n`; });
-
             } else {
-
                 text += "20'den fazla kayıtlı takım bulunmuyor.";
-
             }
-
             document.getElementById('whatsappSlotText').value = text;
-
             if(autoCopy) navigator.clipboard.writeText(text).then(() => alert("Liste Kopyalandı!"));
-
         }
-
-
 
         function generateLeaderboardImage(el, title) {
-
             let sorted = calculateLeaderboard();
-
             let displayTeams = sorted.slice(0, 18);
-
             while(displayTeams.length < 18) displayTeams.push({ teamName: "", kills: "", score: "", wins: "", placeScore: "" });
-
             let leftCol = displayTeams.slice(0, 9);
-
             let rightCol = displayTeams.slice(9, 18);
-
             const gridLayout = "80px 1fr 90px 90px 90px 100px";
 
-
-
             function generateRow(t, index) {
-
                 let rank = index + 1;
-
                 let name = t.teamName || "";
-
                 let logo = name && logosData[name] ? `<img src="${logosData[name]}" style="width:35px; height:35px; object-fit:contain; margin-right:15px; filter:drop-shadow(0 0 5px rgba(255,255,255,0.3)); flex-shrink: 0;">` : (name ? `<div style="width:35px; height:35px; margin-right:15px; flex-shrink: 0;"></div>` : ``);
-
                 let wwcd = t.wins !== undefined && t.wins !== "" ? t.wins : (name ? "0" : "");
-
                 let place = t.placeScore !== undefined && t.placeScore !== "" ? t.placeScore : (name ? "0" : "");
-
                 let kills = t.kills !== undefined && t.kills !== "" ? t.kills : (name ? "0" : "");
-
                 let total = t.score !== undefined && t.score !== "" ? t.score : (name ? "0" : "");
 
-
-
                 return `
-
                 <div style="display: grid; grid-template-columns: ${gridLayout}; align-items: center; padding: 12px 0; font-size: 26px; font-weight: 800; color: white; letter-spacing: 1px;">
-
                     <div style="display: flex; justify-content: center;"><span style="${name ? 'border-bottom: 4px solid white; padding: 0 10px;' : ''}">${name ? rank : ''}</span></div>
-
                     <div style="display: flex; align-items: center; padding-left: 15px; text-transform: uppercase; overflow: hidden;">${logo}<div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${name}</div></div>
-
                     <div style="text-align: center;">${wwcd}</div>
-
                     <div style="text-align: center;">${place}</div>
-
                     <div style="text-align: center;">${kills}</div>
-
                     <div style="text-align: center;">${total}</div>
-
                 </div>`;
-
             }
-
-
 
             let headerHTML = `
-
                 <div style="display: grid; grid-template-columns: ${gridLayout}; border-bottom: 3px solid white; padding-bottom: 12px; margin-bottom: 15px; font-weight: 900; font-size: 22px; color: white; letter-spacing: 2px; align-items: center;">
-
                     <div style="text-align: center;">RANK</div><div style="padding-left: 15px;">TEAM NAME</div><div style="text-align: center;">WWCD</div><div style="text-align: center;">PLACE</div><div style="text-align: center;">KILLS</div><div style="text-align: center;">TOTAL</div>
-
                 </div>`;
 
-
-
             let html = `
-
             <div style="width: 1920px; height: 1080px; background: radial-gradient(circle at 15% 50%, #291b05 0%, #080501 60%), radial-gradient(circle at 85% 50%, #291b05 0%, transparent 60%); background-color: #080501; position: relative; padding: 50px 70px; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; display: flex; flex-direction: column;">
-
                 <div style="text-align: center; margin-bottom: 40px; z-index: 2;">
-
                     <div style="font-size: 65px; font-weight: 900; text-transform: uppercase; line-height: 1.1; letter-spacing: 4px; color: white; text-shadow: 0 0 20px rgba(255,255,255,0.6), 0 0 40px rgba(245, 158, 11, 0.4);">
-
                         <div>PMGO ORGANIZATION</div><div>${title}</div>
-
                     </div>
-
                 </div>
-
                 <div style="flex-grow: 1; border: 3px solid rgba(245,158,11,0.7); box-shadow: 0 0 35px rgba(245,158,11,0.3), inset 0 0 35px rgba(245,158,11,0.1); border-radius: 4px; display: flex; background: rgba(12, 10, 5, 0.85); backdrop-filter: blur(10px); z-index: 2; padding: 25px;">
-
                     <div style="flex: 1; padding-right: 40px; border-right: 3px solid rgba(245,158,11,0.7); display: flex; flex-direction: column;">
-
                         ${headerHTML}<div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-evenly;">${leftCol.map((t, i) => generateRow(t, i)).join('')}</div>
-
                     </div>
-
                     <div style="flex: 1; padding-left: 40px; display: flex; flex-direction: column;">
-
                         ${headerHTML}<div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-evenly;">${rightCol.map((t, i) => generateRow(t, i + 9)).join('')}</div>
-
                     </div>
-
                 </div>
-
             </div>`;
-
             el.innerHTML = html;
-
         }
-
-
 
         function generateSlotsImage(el) {
-
             let html = `<div style="display:flex; flex-direction:column; height: 100%; box-sizing: border-box;">`;
-
             html += `<h1 style="text-align:center; font-size: 65px; color: #f59e0b; margin: 0 0 40px 0; letter-spacing: 4px; font-weight:900; text-shadow: 0 5px 15px rgba(0,0,0,0.8);">TOURNAMENT SLOTS (1-20)</h1>`;
-
             html += `<div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(10, 1fr); grid-auto-flow: column; gap: 15px 40px; flex-grow: 1;">`;
-
             let displayTeams = currentTeams.slice(0, 20);
-
             while(displayTeams.length < 20) displayTeams.push("-");
-
             displayTeams.forEach((team, i) => {
-
                 let op = team === "-" ? "0.15" : "1";
-
                 html += `<div style="opacity: ${op}; background: rgba(255,255,255,0.03); border: 3px solid #f59e0b; border-radius: 16px; display:flex; align-items:center; padding: 0 20px;"><span style="background:#f59e0b; color:white; padding:8px 18px; border-radius:10px; font-size:30px; font-weight:900; min-width:55px; text-align:center;">${i+1}</span><span style="margin-left:25px; font-size: 34px; font-weight:800; text-transform:uppercase; color:white;">${team}</span></div>`;
-
             });
-
             html += `</div></div>`; el.innerHTML = html;
-
         }
-
-
 
         function generateMVPImage(el) {
-
             let html = `<div style="display:flex; flex-direction:column; justify-content:center; height: 100%; box-sizing: border-box;">`;
-
             html += `<h1 style="text-align:center; font-size: 80px; color: #f59e0b; margin: 0 0 60px 0; letter-spacing: 6px; font-weight:900;">TOP FRAGGERS</h1>`;
-
             html += `<div style="display: flex; justify-content: space-between; align-items: stretch; gap: 50px;">`;
-
             for(let i=0; i<3; i++) {
-
                 let m = mvpsData[i] || {name: "TBD", team: "TBD", kills: "0"};
-
                 let color = i===0 ? "#facc15" : (i===1 ? "#94a3b8" : "#b45309");
-
                 html += `<div style="flex:1; background: rgba(0,0,0,0.4); border: 5px solid ${color}; border-radius: 30px; padding: 60px 30px; text-align: center;"><h2 style="color: ${color}; font-size: 80px; margin: 0 0 20px 0; font-weight:900;">#${i+1}</h2><h3 style="color: #fff; font-size: 55px; margin: 0 0 15px 0; font-weight:800; text-transform:uppercase;">${m.name}</h3><h4 style="color: #9ca3af; font-size: 30px; margin: 0 0 40px 0; font-weight:700; text-transform:uppercase;">${m.team}</h4><div style="font-size: 70px; color: #f87171; font-weight: 900;">${m.kills} <span style="font-size: 40px; color:#fca5a5;">KILLS</span></div></div>`;
-
             }
-
             html += `</div></div>`; el.innerHTML = html;
-
         }
-
-
 
         function downloadImage(elementId, filename) {
-
             const element = document.getElementById(elementId);
-
             if (elementId === 'render-livescore') generateLeaderboardImage(element, "LIVESCORE");
-
             if (elementId === 'render-result') generateLeaderboardImage(element, "MATCH RESULTS");
-
             if (elementId === 'render-slots') generateSlotsImage(element);
-
             if (elementId === 'render-mvp') generateMVPImage(element);
-
             setTimeout(() => {
-
                 html2canvas(element, { backgroundColor: '#020611', scale: 2, useCORS: true }).then(canvas => {
-
                     const link = document.createElement('a'); link.download = filename; link.href = canvas.toDataURL('image/png', 1.0); link.click();
-
                 });
-
-            }, 400);
-
+            }, 400); 
         }
-
-
 
         async function saveMVPs() {
-
             let newMvps = [];
-
             for(let i=0; i<3; i++) {
-
                 newMvps.push({ name: document.getElementById(`mvp-name-${i}`).value, team: document.getElementById(`mvp-team-${i}`).value, kills: document.getElementById(`mvp-kills-${i}`).value });
-
             }
-
-            await fetch('/api/mvps', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mvps: newMvps }) });
-
+            await fetch('/api/mvps', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: currentUser, mvps: newMvps }) });
             alert("MVP'ler kaydedildi!");
-
         }
-
-
 
         async function loadRostersTab() {
-
-            const res = await fetch('/api/data'); const data = await res.json();
-
+            const res = await fetch(`/api/data?user=${currentUser}`); const data = await res.json();
             currentTeams = data.teams; rostersData = data.rosters || {}; logosData = data.logos || {};
-
             const container = document.getElementById('rostersContainer'); container.innerHTML = '';
-
-           
-
-            if(currentTeams.length === 0) {
-
-                container.innerHTML = `<div class="text-gray-500 text-center py-10 font-bold">Henüz kayıtlı takım yok! Yukarıdan yeni takım ekleyebilirsiniz.</div>`;
-
-                return;
-
+            
+            if(currentTeams.length === 0) { 
+                container.innerHTML = `<div class="text-gray-500 text-center py-10 font-bold">Henüz kayıtlı takım yok! Yukarıdan yeni takım ekleyebilirsiniz.</div>`; 
+                return; 
             }
 
-
-
             currentTeams.forEach((team) => {
-
                 if(!rostersData[team]) rostersData[team] = ["", "", "", "", ""];
-
                 let r = rostersData[team]; let currentLogo = logosData[team] || "";
-
                 let hasSub = activeSubMenu[team] || (r[4] && r[4].trim() !== "");
-
                 let safeTeam = team.replace(/'/g, "\\'");
 
-
-
                 container.innerHTML += `
-
                     <div class="glass-panel p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6">
-
                         <div class="w-full md:w-64 flex flex-col items-center md:items-start text-center md:text-left">
-
                             <div class="flex items-center gap-3 mb-3">
-
                                 <div class="w-14 h-14 bg-gray-950 border border-gray-800 rounded-lg overflow-hidden flex items-center justify-center shrink-0">
-
                                     ${currentLogo ? `<img src="${currentLogo}" class="w-full h-full object-contain">` : `<span class="text-[10px] font-bold text-gray-500">Yok</span>`}
-
                                 </div>
-
                                 <div>
-
                                     <h3 class="text-xl font-black text-amber-400 uppercase tracking-wide">${team}</h3>
-
                                     <input type="file" accept="image/*" onchange="uploadLogo(event, '${safeTeam}')" class="text-[10px] text-gray-400 mt-1 file:py-1 file:px-2 file:rounded file:bg-amber-600 file:text-white cursor-pointer">
-
                                 </div>
-
                             </div>
-
                             <div class="flex gap-2 mt-2">
-
                                 <button onclick="toggleSub('${safeTeam}')" class="px-3 py-1.5 ${hasSub ? 'bg-purple-900 text-purple-200' : 'bg-gray-800 text-gray-300'} text-xs font-bold rounded-lg">⭐ Yedek</button>
-
                                 <button onclick="removeTeam('${safeTeam}')" class="px-3 py-1.5 bg-red-950 hover:bg-red-600 text-red-200 text-xs font-bold rounded-lg">Sil</button>
-
                             </div>
-
                         </div>
-
                         <div class="flex-1 flex flex-col gap-3 w-full">
-
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-
                                 ${[0,1,2,3].map(i => `<div><label class="block text-[10px] font-bold text-gray-400 mb-1">P${i+1}</label><input type="text" id="roster-${safeTeam}-${i}" value="${r[i] || ''}" oninput="updateRosterData('${safeTeam}')" class="w-full bg-gray-950 border border-gray-800 p-2.5 rounded-lg text-xs text-white font-bold"></div>`).join('')}
-
                             </div>
-
                             <div id="sub-box-${safeTeam}" class="${hasSub ? 'block' : 'hidden'} bg-purple-950/20 border border-purple-500/30 p-3 rounded-xl">
-
                                 <label class="block text-[10px] font-bold text-purple-400 mb-1">⭐ Yedek</label>
-
                                 <input type="text" id="roster-${safeTeam}-4" value="${r[4] || ''}" oninput="updateRosterData('${safeTeam}')" class="w-full bg-gray-950 border border-purple-800 p-2.5 rounded-lg text-xs text-white font-bold" placeholder="Yedek oyuncu...">
-
                             </div>
-
                         </div>
-
                     </div>`;
-
             });
-
         }
-
-
 
         function toggleSub(teamName) { activeSubMenu[teamName] = !activeSubMenu[teamName]; loadRostersTab(); }
 
-
-
         async function addSingleTeam() {
-
             const input = document.getElementById('singleTeamInput');
-
             const teamName = input.value.trim();
-
             if(!teamName) return alert("Lütfen bir takım adı yazın!");
 
-
-
-            await fetch('/api/teams', {
-
-                method: 'POST',
-
-                headers: { 'Content-Type': 'application/json' },
-
-                body: JSON.stringify({ teamList: teamName })
-
+            await fetch('/api/teams', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ user: currentUser, teamList: teamName }) 
             });
-
             input.value = '';
-
             loadRostersTab();
-
             alert(`"${teamName}" başarıyla eklendi!`);
-
         }
-
-
 
         async function uploadLogo(event, teamName) {
-
             const file = event.target.files[0]; if (!file) return;
-
             const reader = new FileReader();
-
             reader.onload = function(e) {
-
                 const img = new Image();
-
                 img.onload = async function() {
-
                     const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-
                     canvas.width = 256; canvas.height = 256; ctx.drawImage(img, 0, 0, 256, 256);
-
                     const compressedBase64 = canvas.toDataURL('image/png'); logosData[teamName] = compressedBase64;
-
-                    socket.emit('logoUpdate', { team: teamName, logo: compressedBase64 });
-
+                    await fetch('/api/logo', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user: currentUser, team: teamName, logo: compressedBase64 })
+                    });
                     loadRostersTab();
-
                 }; img.src = e.target.result;
-
             }; reader.readAsDataURL(file);
-
         }
-
-
 
         async function uploadTournamentLogo(event) {
-
             const file = event.target.files[0]; if (!file) return;
-
             const reader = new FileReader();
-
             reader.onload = function(e) {
-
                 const img = new Image();
-
                 img.onload = function() {
-
                     const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-
                     canvas.width = 256; canvas.height = 256; ctx.drawImage(img, 0, 0, 256, 256);
-
                     tempTournamentLogo = canvas.toDataURL('image/png');
-
                     document.getElementById('tournamentLogoPreview').innerHTML = `<img src="${tempTournamentLogo}" class="w-full h-full object-contain">`;
-
                 }; img.src = e.target.result;
-
             }; reader.readAsDataURL(file);
-
         }
-
-
 
         async function updateRosterData(team) {
-
             let p = []; for(let i=0; i<5; i++) { let inputEl = document.getElementById(`roster-${team}-${i}`); p.push(inputEl ? inputEl.value : ""); }
-
             rostersData[team] = p;
-
-            await fetch('/api/rosters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ rosters: rostersData }) });
-
+            await fetch('/api/rosters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: currentUser, rosters: rostersData }) });
         }
-
-
 
         async function removeTeam(teamName) {
-
             if(confirm(`"${teamName}" silinsin mi?`)) {
-
-                await fetch('/api/remove-team', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ team: teamName }) });
-
+                await fetch('/api/remove-team', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: currentUser, team: teamName }) });
                 loadRostersTab();
-
             }
-
         }
 
-
-
         async function loadTable() {
-
-            const res = await fetch('/api/data'); const data = await res.json();
-
+            const res = await fetch(`/api/data?user=${currentUser}`); const data = await res.json();
             currentTeams = data.teams; matchScores = data.scores || {}; aliveStatus = data.alive || {}; teamManualStatus = data.manualStatus || {}; logosData = data.logos || {}; currentlySpectating = data.spectating || "";
-
             showAliveGlobal = data.settings && data.settings.showAlive !== undefined ? data.settings.showAlive : true;
-
-           
-
+            
             document.getElementById('thAliveCol').style.display = showAliveGlobal ? '' : 'none';
-
             document.getElementById('thStatusCol').style.display = !showAliveGlobal ? '' : 'none';
-
             const tbody = document.getElementById('scoreTableBody'); tbody.innerHTML = '';
 
-
-
             currentTeams.forEach((team, tIndex) => {
-
                 if(!aliveStatus[team]) aliveStatus[team] = [3, 3, 3, 3];
-
                 if(teamManualStatus[team] === undefined) teamManualStatus[team] = false;
-
                 let isSpec = currentlySpectating === team; let logo = logosData[team] || "";
-
                 let safeTeam = team.replace(/'/g, "\\'");
 
-
-
                 let aliveTd = showAliveGlobal ? `<td class="px-4 py-4 text-center"><div class="flex justify-center gap-1.5">${[0,1,2,3].map(pIdx => {
-
                     let status = aliveStatus[team][pIdx] !== undefined ? aliveStatus[team][pIdx] : 3;
-
                     let colorClass = status === 3 ? 'bg-green-500' : (status === 2 ? 'bg-yellow-500' : 'bg-red-600');
-
                     return `<div onclick="cycleAliveStatus('${safeTeam}', ${pIdx}, ${tIndex})" id="box-${tIndex}-${pIdx}" class="w-5 h-7 rounded ${colorClass} cursor-pointer border border-black shadow"></div>`;
-
                 }).join('')}</div></td>` : `<td style="display:none;"></td>`;
-
-
 
                 let statusTd = !showAliveGlobal ? `<td class="px-4 py-4 text-center"><button onclick="toggleManualStatus('${safeTeam}', ${tIndex})" id="status-btn-${tIndex}" class="px-3 py-1.5 rounded-lg text-xs font-black ${teamManualStatus[team] ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}">${teamManualStatus[team] ? '🔴 ELENDİ' : '🟢 HAYATTA'}</button></td>` : `<td style="display:none;"></td>`;
 
-
-
                 let row = `<tr class="hover:bg-gray-900/60 transition-all border-b border-gray-900">
-
                     <td class="px-6 py-4 font-black text-white flex items-center gap-3">
-
                         <div class="w-8 h-8 bg-gray-950 border border-gray-800 rounded flex items-center justify-center overflow-hidden shrink-0">${logo ? `<img src="${logo}" class="w-full h-full object-contain">` : ``}</div>
-
                         <span class="truncate max-w-[150px]">${team}</span>
-
                     </td>
-
                     <td class="px-4 py-4 text-center"><button onclick="setSpectateTeam('${safeTeam}')" class="px-4 py-2 ${isSpec ? 'spectating-active' : 'bg-gray-800 hover:bg-amber-600'} rounded-lg text-xs font-bold text-white">🎥 ${isSpec ? 'YAYINDA' : 'İzle'}</button></td>
-
                     ${aliveTd}${statusTd}`;
-
-               
-
+                
                 for(let mIndex=0; mIndex<5; mIndex++) {
-
                     let match = (matchScores[team] && matchScores[team][mIndex]) ? matchScores[team][mIndex] : {kill:'', rank:''};
-
                     let bgCol = mIndex % 2 === 0 ? 'bg-amber-950/10' : 'bg-gray-900/10';
-
-                   
-
+                    
                     row += `
-
                     <td class="px-2 py-4 text-center ${bgCol} border-l border-gray-800">
-
                         <input type="number" value="${match.kill}" oninput="handleInput('${safeTeam}', ${mIndex}, 'kill', this.value)" placeholder="Kill" class="w-14 bg-gray-950 border border-amber-500/40 focus:border-amber-400 rounded text-center py-1.5 text-amber-300 font-bold text-sm outline-none">
-
                     </td>
-
                     <td class="px-2 py-4 text-center ${bgCol}">
-
                         <input type="number" value="${match.rank}" oninput="handleInput('${safeTeam}', ${mIndex}, 'rank', this.value)" placeholder="Sıra" class="w-14 bg-gray-950 border border-cyan-500/40 focus:border-cyan-400 rounded text-center py-1.5 text-cyan-300 font-bold text-sm outline-none">
-
                     </td>`;
-
                 }
-
                 row += `<td class="px-6 py-4 text-center font-black text-2xl text-amber-400 border-l border-gray-800" id="total-${tIndex}">0</td></tr>`;
-
                 tbody.innerHTML += row;
-
             }); calculateAll();
-
         }
 
-
-
-        function setSpectateTeam(teamName) { currentlySpectating = (currentlySpectating === teamName) ? "" : teamName; socket.emit('setSpectate', currentlySpectating); loadTable(); }
-
-
+        function setSpectateTeam(teamName) { 
+            currentlySpectating = (currentlySpectating === teamName) ? "" : teamName; 
+            socket.emit('setSpectate', { user: currentUser, teamName: currentlySpectating }); 
+            loadTable(); 
+        }
 
         function triggerEliminatedAlert(team) {
-
             calculateAll();
-
             let foundTeam = calculateLeaderboard().find(t => t.teamName === team);
-
             let kills = foundTeam ? foundTeam.kills : 0;
-
             let score = foundTeam ? foundTeam.score : 0;
-
-            socket.emit('triggerAlert', { team: team, kills: kills, score: score });
-
+            socket.emit('triggerAlert', { user: currentUser, team: team, kills: kills, score: score });
         }
-
-
 
         function cycleAliveStatus(team, pIdx, tIndex) {
-
             if(!aliveStatus[team]) aliveStatus[team] = [3,3,3,3];
-
             let prevDead = aliveStatus[team].every(v => v === 1);
-
             let current = aliveStatus[team][pIdx]; let next = current === 3 ? 2 : (current === 2 ? 1 : 3);
-
             aliveStatus[team][pIdx] = next;
-
             const box = document.getElementById(`box-${tIndex}-${pIdx}`);
-
             if(box) box.className = `w-5 h-7 rounded cursor-pointer border border-black shadow ${next === 3 ? 'bg-green-500' : (next === 2 ? 'bg-yellow-500' : 'bg-red-600')}`;
-
             let nowDead = aliveStatus[team].every(v => v === 1);
-
             if (!prevDead && nowDead) triggerEliminatedAlert(team);
-
-            socket.emit('aliveUpdate', { alive: aliveStatus });
-
+            socket.emit('aliveUpdate', { user: currentUser, alive: aliveStatus });
         }
-
-
 
         function toggleManualStatus(team, tIndex) {
-
             if(teamManualStatus[team] === undefined) teamManualStatus[team] = false;
-
             teamManualStatus[team] = !teamManualStatus[team];
-
             const btn = document.getElementById(`status-btn-${tIndex}`);
-
             if(btn) {
-
                 btn.className = `px-3 py-1.5 rounded-lg text-xs font-black ${teamManualStatus[team] ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`;
-
                 btn.innerText = teamManualStatus[team] ? '🔴 ELENDİ' : '🟢 HAYATTA';
-
             }
-
-            socket.emit('manualStatusUpdate', { manualStatus: teamManualStatus });
-
+            socket.emit('manualStatusUpdate', { user: currentUser, manualStatus: teamManualStatus });
             if (teamManualStatus[team]) triggerEliminatedAlert(team);
-
             calculateAll();
-
         }
-
-
 
         function handleInput(team, matchIndex, type, value) {
-
             if (!matchScores[team]) { matchScores[team] = []; for(let i=0; i<5; i++) matchScores[team].push({ kill: '', rank: '' }); }
-
             if (!matchScores[team][matchIndex]) matchScores[team][matchIndex] = { kill: '', rank: '' };
-
             matchScores[team][matchIndex][type] = value; calculateAll();
-
         }
-
-
 
         function calculateLeaderboard() {
-
             let leaderboard = [];
-
             currentTeams.forEach((team) => {
-
                 let totalPlacement = 0, totalKills = 0, wins = 0;
-
                 let tScores = matchScores[team];
-
                 if (!tScores) { tScores = []; for(let i=0; i<5; i++) tScores.push({kill:'', rank:''}); matchScores[team] = tScores; }
-
-               
-
+                
                 for(let i=0; i<5; i++) {
-
                     if(tScores[i]) {
-
                         const k = parseInt(tScores[i].kill);
-
                         const r = parseInt(tScores[i].rank);
-
                         if(!isNaN(k)) totalKills += k;
-
                         if(!isNaN(r)) { if(r === 1) wins++; if(placementPoints[r]) totalPlacement += placementPoints[r]; }
-
                     }
-
                 }
-
                 leaderboard.push({ teamName: team, score: totalPlacement + totalKills, kills: totalKills, wins: wins, placeScore: totalPlacement });
-
             });
-
             leaderboard.sort((a, b) => b.score - a.score); return leaderboard;
-
         }
-
-
 
         function calculateAll() {
-
             const leaderboard = calculateLeaderboard();
-
             leaderboard.forEach((t) => { const tIndex = currentTeams.indexOf(t.teamName); const totalEl = document.getElementById(`total-${tIndex}`); if(totalEl) totalEl.innerText = t.score; });
-
-            socket.emit('liveUpdate', { scores: matchScores, leaderboard, alive: aliveStatus, manualStatus: teamManualStatus, logos: logosData, teams: currentTeams });
-
+            socket.emit('liveUpdate', { user: currentUser, scores: matchScores, leaderboard, alive: aliveStatus, manualStatus: teamManualStatus, logos: logosData, teams: currentTeams });
         }
-
-
 
         async function loadSettingsData() {
-
-            const res = await fetch('/api/data'); const data = await res.json();
-
+            const res = await fetch(`/api/data?user=${currentUser}`); const data = await res.json();
             document.getElementById('tournamentNameInput').value = data.settings.tournamentName || "PMGO 2026";
-
             if (data.settings.showAlive !== undefined) document.getElementById('showAliveSelect').value = data.settings.showAlive.toString();
-
             if (data.settings.showMarquee !== undefined) document.getElementById('showMarqueeSelect').value = data.settings.showMarquee.toString();
-
             if (data.tournamentLogo) {
-
                 tempTournamentLogo = data.tournamentLogo;
-
                 document.getElementById('tournamentLogoPreview').innerHTML = `<img src="${data.tournamentLogo}" class="w-full h-full object-contain">`;
-
             }
-
             let current = data.settings.currentMatch || "MATCH 1 / ERANGEL"; let parts = current.split('/');
-
             if(parts.length >= 2) { document.getElementById('matchNumSelect').value = parts[0].trim(); document.getElementById('mapNameSelect').value = parts[1].trim(); }
-
         }
-
-
 
         async function saveSettings() {
-
-            let mNum = document.getElementById('matchNumSelect').value;
-
-            let mName = document.getElementById('mapNameSelect').value;
-
+            let mNum = document.getElementById('matchNumSelect').value; 
+            let mName = document.getElementById('mapNameSelect').value; 
             let combinedMatch = `${mNum} / ${mName}`;
-
-            let showAliveVal = document.getElementById('showAliveSelect').value === 'true';
-
+            let showAliveVal = document.getElementById('showAliveSelect').value === 'true'; 
             let showMarqueeVal = document.getElementById('showMarqueeSelect').value === 'true';
 
-
-
             if (tempTournamentLogo) {
-
-                await fetch('/api/tournament-logo', {
-
-                    method: 'POST',
-
-                    headers: { 'Content-Type': 'application/json' },
-
-                    body: JSON.stringify({ tournamentLogo: tempTournamentLogo })
-
+                await fetch('/api/tournament-logo', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ user: currentUser, tournamentLogo: tempTournamentLogo }) 
                 });
-
             }
 
-
-
-            await fetch('/api/settings', {
-
-                method: 'POST',
-
-                headers: { 'Content-Type': 'application/json' },
-
-                body: JSON.stringify({
-
-                    tournamentName: document.getElementById('tournamentNameInput').value,
-
-                    currentMatch: combinedMatch,
-
-                    showAlive: showAliveVal,
-
+            await fetch('/api/settings', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ 
+                    user: currentUser,
+                    tournamentName: document.getElementById('tournamentNameInput').value, 
+                    currentMatch: combinedMatch, 
+                    showAlive: showAliveVal, 
                     showMarquee: showMarqueeVal,
-
-                    tournamentLogo: tempTournamentLogo
-
-                })
-
+                    tournamentLogo: tempTournamentLogo 
+                }) 
             });
 
-
-
             alert("Ayarlar ve Turnuva Logosu başarıyla güncellendi!");
-
         }
-
-
 
         async function saveTeams() {
-
             const teamInput = document.getElementById('teamInput').value; if(!teamInput.trim()) return;
-
-            await fetch('/api/teams', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ teamList: teamInput }) });
-
+            await fetch('/api/teams', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: currentUser, teamList: teamInput }) });
             document.getElementById('teamInput').value = ''; calculateAll(); switchTab('tab-spreadsheet');
-
         }
 
-
-
-        async function resetSystem() {
-
-            if(confirm("Sıfırlansın mı?")) {
-
-                await fetch('/api/reset', { method: 'POST' });
-
-                location.reload();
-
-            }
-
+        async function resetSystem() { 
+            if(confirm("Sıfırlansın mı?")) { 
+                await fetch('/api/reset', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user: currentUser })
+                }); 
+                location.reload(); 
+            } 
         }
-
     </script>
-
 </body>
-
 </html>
