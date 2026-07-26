@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+
+<html lang="tr">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>PMGO Official Broadcast Overlay - Logo Fix</title>
+
+    <script src="/socket.io/socket.io.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;900&display=swap" rel="stylesheet">
+
+    <style>
+
+        :root {
+
+            --neon-cyan: #00e5ff;
+
+            --neon-purple: #b535f6;
+
+            --dark-bg: rgba(6, 9, 15, 0.92);
+
+            --glass-border: rgba(255, 255, 255, 0.1);
+
+        }
+
+
+
+        body { margin: 0; padding: 0; background: transparent; font-family: 'Rajdhani', sans-serif; overflow: hidden; width: 1920px; height: 1080px; }
+
+
+
+        #top-left-spectate {
+
+            position: absolute; left: -25px; top: 56px; display: none; width: 110px; height: 26px;
+
+            overflow: hidden; pointer-events: none; z-index: 100;
+
+        }
+
+        .tl-cropped-logo {
+
+            width: 150px; height: 150px; position: absolute; left: 0; top: -50px;
+
+            display: flex; align-items: center; justify-content: center;
+
+        }
+
+        .tl-cropped-logo img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 8px var(--neon-cyan)); }
+
+       
+
+        #bottom-center-spectate {
+
+            position: absolute; left: 36%; bottom: 141px; transform: translateX(-50%); display: none; align-items: center; justify-content: center;
+
+            background: var(--dark-bg); border: 2px solid var(--neon-cyan); border-radius: 50%; width: 70px; height: 70px;
+
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.4), inset 0 0 15px rgba(0, 229, 255, 0.2);
+
+            backdrop-filter: blur(16px); z-index: 100;
+
+        }
+
+        .bc-logo { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; }
+
+        .bc-logo img { width: 100%; height: 100%; object-fit: contain; }
+
+
+
+        #eliminated-alert-box {
+
+            position: absolute; left: 50%; top: 120px; transform: translateX(-50%); display: none; flex-direction: column; align-items: center;
+
+            background: linear-gradient(135deg, rgba(181, 53, 246, 0.15), var(--dark-bg) 40%);
+
+            border: 1px solid var(--neon-purple); border-bottom: 4px solid var(--neon-purple); border-radius: 12px; padding: 25px 60px;
+
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8), 0 0 40px rgba(181, 53, 246, 0.4); z-index: 200;
+
+            animation: slideDownAlert 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, pulseNeon 2s infinite alternate;
+
+        }
+
+        @keyframes slideDownAlert { from { top: 80px; opacity: 0; transform: translateX(-50%) scale(0.9); } to { top: 120px; opacity: 1; transform: translateX(-50%) scale(1); } }
+
+        @keyframes pulseNeon { from { box-shadow: 0 0 30px rgba(181, 53, 246, 0.3); } to { box-shadow: 0 0 50px rgba(181, 53, 246, 0.6); } }
+
+       
+
+        .ea-title { font-size: 1.2rem; font-weight: 900; color: var(--neon-purple); letter-spacing: 5px; text-transform: uppercase; margin-bottom: 10px; text-shadow: 0 0 10px var(--neon-purple); }
+
+        .ea-content { display: flex; align-items: center; gap: 25px; }
+
+        .ea-logo-wrap { width: 75px; height: 75px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.1); border-radius: 50%; padding: 5px; }
+
+        .ea-logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+
+        .ea-info-wrap { display: flex; flex-direction: column; }
+
+        .ea-team { font-size: 2.6rem; font-weight: 900; color: #ffffff; letter-spacing: 1px; text-transform: uppercase; line-height: 1; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+
+        .ea-stats { display: flex; gap: 20px; margin-top: 8px; font-size: 1.2rem; font-weight: 700; }
+
+        .ea-stat-item { display: flex; gap: 8px; align-items: center; background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 20px; }
+
+        .ea-stat-label { color: #a1a1aa; font-size: 0.9rem; letter-spacing: 1px; }
+
+        .ea-stat-val { color: var(--neon-cyan); font-weight: 900; }
+
+
+
+        #match-info-box {
+
+            position: absolute; left: 30px; bottom: 45px;
+
+            display: flex; align-items: center;
+
+            z-index: 90; transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+        }
+
+        .mi-logo-area {
+
+            width: 75px; height: 75px; margin-right: 20px;
+
+            display: flex; align-items: center; justify-content: center;
+
+            background: transparent; border: none; box-shadow: none; flex-shrink: 0;
+
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+
+        }
+
+        .mi-logo-area img { width: 100%; height: 100%; object-fit: contain; }
+
+       
+
+        .mi-text-wrap {
+
+            display: flex; flex-direction: column;
+
+            background: linear-gradient(90deg, var(--dark-bg), rgba(6, 9, 15, 0.4));
+
+            padding: 10px 30px 10px 20px; border-left: 4px solid var(--neon-cyan);
+
+            border-radius: 0 12px 12px 0; backdrop-filter: blur(10px);
+
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+
+        }
+
+        .mi-tour { font-size: 0.9rem; font-weight: 900; color: var(--neon-cyan); letter-spacing: 3px; text-transform: uppercase; }
+
+        .mi-match { font-size: 1.7rem; font-weight: 900; color: #ffffff; letter-spacing: 1px; text-transform: uppercase; line-height: 1.1; margin-top: 2px; }
+
+
+
+        #bottom-marquee-bar {
+
+            position: absolute; left: 0; bottom: 0; width: 1920px; height: 32px;
+
+            background: #000000; border-top: 1px solid rgba(255,255,255,0.1);
+
+            overflow: hidden; display: flex; align-items: center; z-index: 80;
+
+        }
+
+        .marquee-track { display: flex; gap: 60px; white-space: nowrap; animation: scrollMarquee 40s linear infinite; }
+
+        @keyframes scrollMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+        .marquee-item { display: flex; align-items: center; gap: 12px; font-size: 1.1rem; font-weight: 700; color: #d4d4d8; text-transform: uppercase; letter-spacing: 2px; }
+
+        .marquee-logo { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
+
+        .marquee-logo img { width: 100%; height: 100%; object-fit: contain; }
+
+
+
+        #leaderboard-box {
+
+            position: absolute; right: 0; bottom: 32px; width: 370px;
+
+            background: var(--dark-bg);
+
+            border-top: 3px solid var(--neon-cyan);
+
+            border-left: 1px solid var(--glass-border);
+
+            border-radius: 16px 0 0 0; overflow: hidden;
+
+            box-shadow: -10px -10px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 229, 255, 0.1);
+
+            backdrop-filter: blur(20px); transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+        }
+
+        .lb-header {
+
+            background: rgba(255,255,255,0.03); padding: 12px 15px; font-weight: 900; font-size: 0.9rem; letter-spacing: 1.5px;
+
+            display: flex; align-items: center; border-bottom: 1px solid var(--glass-border); color: #a1a1aa;
+
+        }
+
+        .lb-body { max-height: 680px; overflow: hidden; display: flex; flex-direction: column; }
+
+       
+
+        .lb-row {
+
+            display: flex; align-items: center; padding: 0 15px;
+
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+
+            font-size: 1rem; font-weight: 700; height: 34px; box-sizing: border-box;
+
+            transition: all 0.3s;
+
+        }
+
+        .lb-row:nth-child(even) { background: rgba(0, 0, 0, 0.2); }
+
+        .lb-row:last-child { border-bottom: none; }
+
+
+
+        .lb-row.eliminated {
+
+            background: rgba(40, 40, 45, 0.4) !important;
+
+            opacity: 0.45;
+
+            filter: grayscale(80%);
+
+        }
+
+        .lb-row.eliminated .lb-name,
+
+        .lb-row.eliminated .lb-rank,
+
+        .lb-row.eliminated .lb-pts {
+
+            color: #9ca3af !important;
+
+            text-shadow: none !important;
+
+        }
+
+       
+
+        .lb-rank { width: 30px; color: var(--neon-cyan); font-weight: 900; flex-shrink: 0; font-size: 1.1rem; }
+
+        .lb-logo { width: 20px; height: 20px; margin-right: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+        .lb-logo img { width: 100%; height: 100%; object-fit: contain; }
+
+       
+
+        .lb-name { flex-grow: 1; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; color: #ffffff; letter-spacing: 0.5px; }
+
+       
+
+        .lb-alive { width: 60px; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0; }
+
+        .alive-bar { width: 6px; height: 6px; background: #10b981; border-radius: 50%; box-shadow: 0 0 6px #10b981; }
+
+        .alive-bar.yellow { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; animation: blinkYellow 0.6s infinite alternate; }
+
+        @keyframes blinkYellow { from { opacity: 0.4; } to { opacity: 1; } }
+
+        .alive-bar.dead { background: #ef4444; opacity: 0.3; box-shadow: none; }
+
+
+
+        .lb-kills { width: 40px; text-align: center; color: #f87171; font-weight: 900; flex-shrink: 0; font-size: 1.1rem; }
+
+        .lb-pts { font-weight: 900; color: #ffffff; width: 40px; text-align: right; text-shadow: 0 0 10px rgba(255,255,255,0.4); flex-shrink: 0; font-size: 1.2rem; }
+
+    </style>
+
+</head>
+
+<body>
+
+
+
+    <div id="match-info-box">
+
+        <div class="mi-logo-area" id="tourLogoWrap"></div>
+
+        <div class="mi-text-wrap">
+
+            <div class="mi-tour" id="tourName">TOURNAMENT</div>
+
+            <div class="mi-match" id="matchName">MATCH 1</div>
+
+        </div>
+
+    </div>
+
+
+
+    <div id="eliminated-alert-box">
+
+        <div class="ea-title">⚡ SQUAD ELIMINATED ⚡</div>
+
+        <div class="ea-content">
+
+            <div class="ea-logo-wrap" id="eaLogoWrap"></div>
+
+            <div class="ea-info-wrap">
+
+                <div class="ea-team" id="eliminatedTeamName">TEAM</div>
+
+                <div class="ea-stats">
+
+                    <div class="ea-stat-item"><span class="ea-stat-label">KILLS</span><span class="ea-stat-val" id="eaKills">0</span></div>
+
+                    <div class="ea-stat-item"><span class="ea-stat-label">PTS</span><span class="ea-stat-val" id="eaPts">0</span></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div id="top-left-spectate"><div class="tl-cropped-logo" id="tlCroppedLogoArea"></div></div>
+
+    <div id="bottom-center-spectate"><div class="bc-logo" id="bcLogoArea"></div></div>
+
+    <div id="bottom-marquee-bar"><div class="marquee-track" id="marqueeTrack"></div></div>
+
+
+
+    <div id="leaderboard-box">
+
+        <div class="lb-header" id="lbHeaderTitle">
+
+            <div style="flex-grow: 1; padding-left: 2px;">STANDINGS</div>
+
+            <div id="lbHeaderSub" style="display:flex;"></div>
+
+        </div>
+
+        <div class="lb-body" id="lb-body"></div>
+
+    </div>
+
+
+
+    <script>
+
+        const socket = io();
+
+        let globalAlive = {};
+
+        let globalManualStatus = {};
+
+        let globalLogos = {};
+
+        let globalLeaderboard = [];
+
+        let allRegisteredTeams = [];
+
+        let alertTimeout = null;
+
+        let showAliveGlobal = true;
+
+        let showMarqueeGlobal = true;
+
+
+
+        socket.on('liveUpdate', (data) => {
+
+            if (data.settings) {
+
+                document.getElementById('tourName').innerText = data.settings.tournamentName || '';
+
+                document.getElementById('matchName').innerText = data.settings.currentMatch || '';
+
+                if (data.settings.showAlive !== undefined) {
+
+                    showAliveGlobal = data.settings.showAlive;
+
+                    updateHeaderAliveState();
+
+                }
+
+                if (data.settings.showMarquee !== undefined) {
+
+                    showMarqueeGlobal = data.settings.showMarquee;
+
+                    applyMarqueeVisibility();
+
+                }
+
+            }
+
+            if (data.alive) globalAlive = data.alive;
+
+            if (data.manualStatus) globalManualStatus = data.manualStatus;
+
+            if (data.logos) globalLogos = data.logos;
+
+           
+
+            if (data.leaderboard) {
+
+                globalLeaderboard = data.leaderboard;
+
+                globalLeaderboard.forEach(t => { if(!allRegisteredTeams.includes(t.teamName)) allRegisteredTeams.push(t.teamName); });
+
+                renderLeaderboard();
+
+                updateMarquee();
+
+            }
+
+        });
+
+
+
+        socket.on('tourLogoUpdate', (data) => {
+
+            const wrap = document.getElementById('tourLogoWrap');
+
+            wrap.innerHTML = data.tournamentLogo ? `<img src="${data.tournamentLogo}">` : ``;
+
+        });
+
+
+
+        socket.on('aliveUpdate', (data) => { globalAlive = data.alive; renderLeaderboard(); });
+
+        socket.on('manualStatusUpdate', (data) => { globalManualStatus = data.manualStatus; renderLeaderboard(); });
+
+        socket.on('showEliminatedAlert', (data) => { showEliminatedAlert(data.team); });
+
+        socket.on('logoUpdate', (data) => { globalLogos = data.logos; renderLeaderboard(); updateMarquee(); });
+
+
+
+        function applyMarqueeVisibility() {
+
+            const bar = document.getElementById('bottom-marquee-bar');
+
+            const matchBox = document.getElementById('match-info-box');
+
+            const lbBox = document.getElementById('leaderboard-box');
+
+
+
+            if (showMarqueeGlobal) {
+
+                if(bar) bar.style.display = 'flex';
+
+                if(matchBox) matchBox.style.bottom = '45px';
+
+                if(lbBox) lbBox.style.bottom = '32px';      
+
+            } else {
+
+                if(bar) bar.style.display = 'none';
+
+                if(matchBox) matchBox.style.bottom = '15px';
+
+                if(lbBox) lbBox.style.bottom = '0px';        
+
+            }
+
+        }
+
+
+
+        function updateHeaderAliveState() {
+
+            const sub = document.getElementById('lbHeaderSub');
+
+            if(sub) {
+
+                sub.innerHTML = showAliveGlobal
+
+                    ? `<div style="width: 60px; text-align: center;">ALV</div><div style="width: 40px; text-align: center;">KLS</div><div style="width: 40px; text-align: right;">PTS</div>`
+
+                    : `<div style="width: 40px; text-align: center;">KLS</div><div style="width: 40px; text-align: right;">PTS</div>`;
+
+            }
+
+            if (!showAliveGlobal) document.getElementById('eliminated-alert-box').style.display = 'none';
+
+        }
+
+
+
+        function showEliminatedAlert(teamName) {
+
+            const alertBox = document.getElementById('eliminated-alert-box');
+
+            document.getElementById('eliminatedTeamName').innerText = teamName;
+
+
+
+            let foundTeam = globalLeaderboard.find(item => item.teamName === teamName);
+
+            document.getElementById('eaKills').innerText = foundTeam ? (foundTeam.kills || 0) : 0;
+
+            document.getElementById('eaPts').innerText = foundTeam ? (foundTeam.score || 0) : 0;
+
+
+
+            const logoWrap = document.getElementById('eaLogoWrap');
+
+            let logo = globalLogos[teamName] || "";
+
+            logoWrap.innerHTML = logo ? `<img src="${logo}">` : `<span style="font-size:1.5rem;">⚡</span>`;
+
+
+
+            alertBox.style.display = 'flex';
+
+            alertBox.style.animation = 'none';
+
+            alertBox.offsetHeight;
+
+            alertBox.style.animation = 'slideDownAlert 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, pulseNeon 2s infinite alternate';
+
+
+
+            if (alertTimeout) clearTimeout(alertTimeout);
+
+            alertTimeout = setTimeout(() => { alertBox.style.display = 'none'; }, 5000);
+
+        }
+
+
+
+        function updateMarquee() {
+
+            const track = document.getElementById('marqueeTrack');
+
+            if(!track) return;
+
+            let teamsList = globalLeaderboard.map(t => t.teamName);
+
+            allRegisteredTeams.forEach(team => { if(!teamsList.includes(team)) teamsList.push(team); });
+
+
+
+            if(teamsList.length === 0) { track.innerHTML = `<div class="marquee-item">SYSTEM ACTIVE</div>`; return; }
+
+
+
+            let itemsHTML = "";
+
+            for(let loop = 0; loop < 2; loop++) {
+
+                teamsList.forEach(team => {
+
+                    let teamLogo = globalLogos[team] || "";
+
+                    let logo = teamLogo ? `<div class="marquee-logo"><img src="${teamLogo}"></div>` : ``;
+
+                    itemsHTML += `<div class="marquee-item">${logo}<span>${team}</span></div><span style="color: var(--neon-cyan);">/</span>`;
+
+                });
+
+            }
+
+            track.innerHTML = itemsHTML;
+
+        }
+
+
+
+        function renderLeaderboard() {
+
+            const lbBody = document.getElementById('lb-body');
+
+            lbBody.innerHTML = '';
+
+           
+
+            let combinedList = [...globalLeaderboard];
+
+            allRegisteredTeams.forEach(team => {
+
+                if (!combinedList.some(item => item.teamName === team)) combinedList.push({ teamName: team, score: 0, kills: 0, wins: 0 });
+
+            });
+
+
+
+            for(let idx = 0; idx < 18; idx++) {
+
+                let t = combinedList[idx];
+
+                let rankNum = idx + 1;
+
+
+
+                if (!t) {
+
+                    let emptyAlive = showAliveGlobal ? `<div class="lb-alive"></div>` : ``;
+
+                    lbBody.innerHTML += `<div class="lb-row" style="opacity: 0.1;"><span class="lb-rank">#${rankNum}</span><div class="lb-logo"></div><span class="lb-name">-</span>${emptyAlive}<span class="lb-kills">-</span><span class="lb-pts">-</span></div>`;
+
+                    continue;
+
+                }
+
+
+
+                let teamAlive = globalAlive[t.teamName] || [3,3,3,3];
+
+                let teamLogo = globalLogos[t.teamName] || "";
+
+                let aliveBarsHTML = "";
+
+               
+
+                let isCompletelyDead = teamAlive.every(status => status === 1);
+
+
+
+                if (showAliveGlobal) {
+
+                    teamAlive.forEach(status => {
+
+                        let cls = "alive-bar";
+
+                        if(status === 2) cls += " yellow";
+
+                        if(status === 1) cls += " dead";
+
+                        aliveBarsHTML += `<div class="${cls}"></div>`;
+
+                    });
+
+                }
+
+
+
+                let logoHTML = teamLogo ? `<div class="lb-logo"><img src="${teamLogo}"></div>` : `<div class="lb-logo"></div>`;
+
+                let aliveTd = showAliveGlobal ? `<div class="lb-alive">${aliveBarsHTML}</div>` : ``;
+
+
+
+                let rowClasses = "lb-row";
+
+                if (isCompletelyDead) {
+
+                    rowClasses += " eliminated";
+
+                }
+
+
+
+                lbBody.innerHTML += `
+
+                    <div class="${rowClasses}">
+
+                        <span class="lb-rank">#${rankNum}</span>
+
+                        ${logoHTML}
+
+                        <span class="lb-name">${t.teamName}</span>
+
+                        ${aliveTd}
+
+                        <span class="lb-kills">${t.kills || 0}</span>
+
+                        <span class="lb-pts">${t.score || 0}</span>
+
+                    </div>
+
+                `;
+
+            }
+
+        }
+
+
+
+        socket.on('spectateUpdate', (data) => {
+
+            const team = data.team;
+
+            const logo = data.logo || "";
+
+            const topLeftBox = document.getElementById('top-left-spectate');
+
+            const bottomCenterBox = document.getElementById('bottom-center-spectate');
+
+
+
+            if (!team) { topLeftBox.style.display = 'none'; bottomCenterBox.style.display = 'none'; return; }
+
+            topLeftBox.style.display = 'block'; bottomCenterBox.style.display = 'flex';
+
+            document.getElementById('tlCroppedLogoArea').innerHTML = logo ? `<img src="${logo}">` : `<span class="tl-fallback-text">${team.substring(0,3)}</span>`;
+
+            document.getElementById('bcLogoArea').innerHTML = logo ? `<img src="${logo}">` : `<span class="bc-fallback">${team.substring(0,3)}</span>`;
+
+        });
+
+
+
+        fetch('/api/data').then(res => res.json()).then(data => {
+
+            if(data.settings) {
+
+                document.getElementById('tourName').innerText = data.settings.tournamentName || '';
+
+                document.getElementById('matchName').innerText = data.settings.currentMatch || '';
+
+                if(data.settings.showAlive !== undefined) showAliveGlobal = data.settings.showAlive;
+
+                if(data.settings.showMarquee !== undefined) { showMarqueeGlobal = data.settings.showMarquee; applyMarqueeVisibility(); }
+
+            }
+
+            if(data.tournamentLogo) document.getElementById('tourLogoWrap').innerHTML = `<img src="${data.tournamentLogo}">`;
+
+            updateHeaderAliveState();
+
+           
+
+            if(data.teams) allRegisteredTeams = data.teams;
+
+            if(data.alive) globalAlive = data.alive;
+
+            if(data.manualStatus) globalManualStatus = data.manualStatus;
+
+            if(data.logos) globalLogos = data.logos;
+
+           
+
+            if(data.leaderboard) { globalLeaderboard = data.leaderboard; renderLeaderboard(); }
+
+            updateMarquee();
+
+            if(data.spectating) socket.emit('setSpectate', data.spectating);
+
+        });
+
+    </script>
+
+</body>
+
+</html>
