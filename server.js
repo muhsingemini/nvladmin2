@@ -12,6 +12,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// KULLANICI BİLGİLERİ
 const ADMIN_USERNAME = "adminkensuw";
 const ADMIN_PASSWORD = "KensuwBaba9078q";
 const DB_FILE = path.join(__dirname, 'database.json');
@@ -30,6 +31,7 @@ function readDB() {
             alive: {},
             manualStatus: {},
             tournamentLogo: "",
+            defaultLogo: "", // EKLENDİ: Varsayılan Takım Logosu
             settings: {
                 tournamentName: "PMGO 2026 GRAND FINALS",
                 currentMatch: "MATCH 1 / ERANGEL",
@@ -63,27 +65,53 @@ app.get('/api/data', (req, res) => {
 app.post('/api/teams', (req, res) => {
     const { teamList } = req.body;
     const db = readDB();
-    if (teamList) {
-        const newTeams = teamList.split('\n').map(t => t.trim()).filter(t => t.length > 0);
-        
-        if (newTeams.length > 23) {
-            return res.status(400).json({ success: false, message: "En fazla 23 takım ekleyebilirsiniz!" });
+    if (teamList !== undefined) {
+        let trimmedInput = teamList.trim();
+
+        if (trimmedInput === "SIFIRLA") {
+            db.teams = [];
+            db.scores = {};
+            db.rosters = {};
+            db.logos = {};
+            db.alive = {};
+            db.manualStatus = {};
+            writeDB(db);
+            
+            io.emit('liveUpdate', { 
+                scores: db.scores, 
+                leaderboard: db.leaderboard, 
+                settings: db.settings, 
+                alive: db.alive, 
+                manualStatus: db.manualStatus, 
+                logos: db.logos, 
+                tournamentLogo: db.tournamentLogo, 
+                defaultLogo: db.defaultLogo,
+                teams: db.teams 
+            });
+
+            return res.json({ success: true, teams: db.teams, reset: true });
         }
 
-        db.teams = [];
-        db.scores = {};
-        db.rosters = {};
-        db.logos = {};
-        db.alive = {};
-        db.manualStatus = {};
+        const newTeams = teamList.split('\n').map(t => t.trim()).filter(t => t.length > 0);
+        
+        let combinedTeams = [...db.teams];
+        newTeams.forEach(t => {
+            if (!combinedTeams.includes(t)) {
+                combinedTeams.push(t);
+            }
+        });
 
-        newTeams.forEach(team => {
-            db.teams.push(team);
-            db.scores[team] = Array(5).fill().map(() => ({ rank: '', kill: '' }));
-            db.rosters[team] = ["", "", "", "", ""];
-            db.logos[team] = "";
-            db.alive[team] = [3, 3, 3, 3];
-            db.manualStatus[team] = false;
+        if (combinedTeams.length > 23) {
+            return res.status(400).json({ success: false, message: "⚠️ Maksimum 23 takım (Slot 3 - 25) sınırına ulaşıldı! Daha fazla ekleyemezsiniz." });
+        }
+
+        db.teams = combinedTeams;
+        db.teams.forEach(team => {
+            if (!db.scores[team]) db.scores[team] = Array(5).fill().map(() => ({ rank: '', kill: '' }));
+            if (!db.rosters[team]) db.rosters[team] = ["", "", "", "", ""];
+            if (!db.logos[team]) db.logos[team] = "";
+            if (!db.alive[team]) db.alive[team] = [3, 3, 3, 3];
+            if (db.manualStatus[team] === undefined) db.manualStatus[team] = false;
         });
         
         writeDB(db);
@@ -96,6 +124,7 @@ app.post('/api/teams', (req, res) => {
             manualStatus: db.manualStatus, 
             logos: db.logos, 
             tournamentLogo: db.tournamentLogo, 
+            defaultLogo: db.defaultLogo,
             teams: db.teams 
         });
 
@@ -149,6 +178,16 @@ app.post('/api/tournament-logo', (req, res) => {
     res.json({ success: true });
 });
 
+// EKLENDİ: Varsayılan Takım Logosu API Endpoints
+app.post('/api/default-logo', (req, res) => {
+    const { defaultLogo } = req.body;
+    const db = readDB();
+    db.defaultLogo = defaultLogo;
+    writeDB(db);
+    io.emit('defaultLogoUpdate', { defaultLogo: db.defaultLogo });
+    res.json({ success: true });
+});
+
 app.post('/api/mvps', (req, res) => { 
     const db = readDB();
     db.mvps = req.body.mvps; 
@@ -165,7 +204,7 @@ app.post('/api/settings', (req, res) => {
     if (req.body.showMarquee !== undefined) db.settings.showMarquee = req.body.showMarquee;
     
     writeDB(db);
-    io.emit('liveUpdate', { scores: db.scores, settings: db.settings, leaderboard: db.leaderboard, alive: db.alive, manualStatus: db.manualStatus, logos: db.logos, tournamentLogo: db.tournamentLogo, teams: db.teams });
+    io.emit('liveUpdate', { scores: db.scores, settings: db.settings, leaderboard: db.leaderboard, alive: db.alive, manualStatus: db.manualStatus, logos: db.logos, tournamentLogo: db.tournamentLogo, defaultLogo: db.defaultLogo, teams: db.teams });
     res.json({ success: true });
 });
 
@@ -177,7 +216,7 @@ io.on('connection', (socket) => {
         if(data.alive) db.alive = data.alive;
         if(data.manualStatus) db.manualStatus = data.manualStatus;
         writeDB(db);
-        io.emit('liveUpdate', { scores: db.scores, leaderboard: db.leaderboard, settings: db.settings, alive: db.alive, manualStatus: db.manualStatus, logos: db.logos, tournamentLogo: db.tournamentLogo, teams: db.teams });
+        io.emit('liveUpdate', { scores: db.scores, leaderboard: db.leaderboard, settings: db.settings, alive: db.alive, manualStatus: db.manualStatus, logos: db.logos, tournamentLogo: db.tournamentLogo, defaultLogo: db.defaultLogo, teams: db.teams });
     });
 
     socket.on('aliveUpdate', (data) => {
@@ -205,7 +244,7 @@ io.on('connection', (socket) => {
         const db = readDB();
         db.spectating = teamName;
         writeDB(db);
-        io.emit('spectateUpdate', { team: teamName, logo: teamName ? (db.logos[teamName] || "") : "" });
+        io.emit('spectateUpdate', { team: teamName, logo: teamName ? (db.logos[teamName] || db.defaultLogo || "") : "" });
     });
 });
 

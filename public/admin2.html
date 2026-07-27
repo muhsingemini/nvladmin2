@@ -162,11 +162,11 @@
         <section id="tab-teams" class="tab-content active max-w-3xl mx-auto">
             <div class="mb-6">
                 <h2 class="text-3xl font-black text-white heading-font tracking-wide">TAKIM HAVUZU</h2>
-                <p class="text-xs text-slate-400 mt-1">Turnuvaya katılaçak takımları alt alta yazarak toplu şekilde sisteme kaydedin.</p>
+                <p class="text-xs text-slate-400 mt-1">Eklemek istediğiniz yeni takımları alt alta yazın (mevcutlar silinmez, üzerine eklenir). Tüm listeyi sıfırlamak için kutuya <span class="text-amber-400 font-bold">SIFIRLA</span> yazabilirsiniz.</p>
             </div>
             <div class="glass-panel p-8 rounded-3xl shadow-2xl space-y-5 border border-amber-500/20">
                 <textarea id="teamInput" rows="10" class="w-full glass-input rounded-2xl p-5 outline-none text-sm text-slate-100 font-mono leading-relaxed" placeholder="S2G Esports&#10;Fire Flux&#10;Beşiktaş Esports"></textarea>
-                <button onclick="saveTeams()" class="w-full py-4 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-slate-950 font-black text-sm rounded-xl transition-all shadow-xl shadow-amber-500/20 active:scale-[0.99] tracking-wider heading-font">TOPLU TAKIMLARI KAYDET</button>
+                <button onclick="saveTeams()" class="w-full py-4 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-slate-950 font-black text-sm rounded-xl transition-all shadow-xl shadow-amber-500/20 active:scale-[0.99] tracking-wider heading-font">YENİ TAKIMLARI EKLE</button>
             </div>
         </section>
 
@@ -175,7 +175,7 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                 <div>
                     <h2 class="text-3xl font-black text-white heading-font tracking-wide">TAKIM YÖNETİMİ & LOGOLAR</h2>
-                    <p class="text-xs text-slate-400 mt-1">Takım logolarını ve oyuncu kadrolarını (Slot 3 - 25) detaylı yönetin.</p>
+                    <p class="text-xs text-slate-400 mt-1">Takım logolarını ve oyuncu kadrolarını detaylı yönetin.</p>
                 </div>
                 <div class="flex gap-2.5 w-full md:w-auto">
                     <input type="text" id="singleTeamInput" placeholder="Yeni Takım Adı..." class="glass-input rounded-xl px-4 py-2.5 text-xs text-white font-bold outline-none">
@@ -318,6 +318,17 @@
                     </div>
                 </div>
 
+                <!-- YENİ: Varsayılan Takım Logosu Alanı -->
+                <div class="bg-slate-950/60 p-5 rounded-2xl border border-slate-800">
+                    <label class="block text-xs font-bold text-amber-400 mb-3 uppercase tracking-wider">🛡️ Varsayılan Takım Logosu</label>
+                    <div class="flex items-center gap-4">
+                        <div id="defaultLogoPreview" class="w-14 h-14 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+                            <span class="text-[10px] text-slate-500 font-bold">Yok</span>
+                        </div>
+                        <input type="file" accept="image/*" onchange="uploadDefaultLogo(event)" class="text-xs text-slate-300 file:py-2 file:px-4 file:rounded-xl file:bg-amber-500 file:text-slate-950 file:font-bold cursor-pointer w-full">
+                    </div>
+                </div>
+
                 <div class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
                     <label class="text-xs font-bold text-amber-400 uppercase tracking-wider">⚡ Canlı Hayatta Kalma (Alive) Durumu</label>
                     <select id="showAliveSelect" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold text-xs outline-none cursor-pointer">
@@ -371,7 +382,7 @@
         let currentUser = localStorage.getItem('pmgo_user');
         let socket;
 
-        if (!currentUser || currentUser !== 'adminmuhsin') {
+        if (!currentUser) {
             document.getElementById('loginModal').style.display = 'flex';
         } else {
             document.getElementById('loginModal').style.display = 'none';
@@ -420,6 +431,19 @@
                 if(data.alive) aliveStatus = data.alive;
                 if(data.manualStatus) manualStatusData = data.manualStatus;
                 if(data.logos) logosData = { ...logosData, ...data.logos };
+                if(data.defaultLogo !== undefined) {
+                    tempDefaultLogo = data.defaultLogo;
+                    if(document.getElementById('defaultLogoPreview')) {
+                        document.getElementById('defaultLogoPreview').innerHTML = tempDefaultLogo ? `<img src="${tempDefaultLogo}" class="w-full h-full object-contain">` : `<span class="text-[10px] text-slate-500 font-bold">Yok</span>`;
+                    }
+                }
+            });
+
+            socket.on('defaultLogoUpdate', (data) => {
+                tempDefaultLogo = data.defaultLogo;
+                document.getElementById('defaultLogoPreview').innerHTML = tempDefaultLogo ? `<img src="${tempDefaultLogo}" class="w-full h-full object-contain">` : `<span class="text-[10px] text-slate-500 font-bold">Yok</span>`;
+                loadTableStructure();
+                loadRostersTab();
             });
 
             switchTab('tab-teams', document.querySelector('#sidebarNav button'));
@@ -429,6 +453,7 @@
         let currentTeams = [], matchScores = {}, mvpsData = [], rostersData = {}, logosData = {}, aliveStatus = {}, manualStatusData = {}, currentlySpectating = "";
         let activeSubMenu = {};
         let tempTournamentLogo = "";
+        let tempDefaultLogo = "";
         let showAliveGlobal = true;
         let showManualStatusGlobal = true;
         let showMarqueeGlobal = true;
@@ -458,6 +483,7 @@
             matchScores = data.scores || {};
             logosData = data.logos || {};
             mvpsData = data.mvps || [];
+            if(data.defaultLogo) tempDefaultLogo = data.defaultLogo;
             copyWhatsAppSlots(false);
 
             const mvpContainer = document.getElementById('mvpInputs');
@@ -480,7 +506,8 @@
             if(currentTeams.length > 18) {
                 currentTeams.slice(18).forEach((t, i) => { 
                     let slotNum = i + 21; 
-                    text += `${i + 19}. Takım (Slot #${slotNum}): ${t}\n`; 
+                    // İSTENİLEN ŞEKİLDE SADECE SLOT VE TAKIM ADI
+                    text += `Slot #${slotNum}: ${t}\n`; 
                 });
             } else {
                 text += "18'den fazla kayıtlı takım bulunmuyor.";
@@ -489,9 +516,6 @@
             if(autoCopy) navigator.clipboard.writeText(text).then(() => alert("Liste Kopyalandı!"));
         }
 
-        // =========================================================================
-        // GÖRSEL ÜRETİCİLER (SLOT TABLOSUNDA SLOT 3-20 / 18 TAKIM)
-        // =========================================================================
         const TPL_STYLE = {
             bg: "radial-gradient(circle at 15% 50%, #1c1404 0%, #030712 60%), radial-gradient(circle at 85% 50%, #1c1404 0%, transparent 60%)",
             cardBg: "rgba(20, 24, 33, 0.85)",
@@ -510,7 +534,8 @@
 
             function makeRow(t, index) {
                 let r = index + 1, name = t.teamName || "";
-                let logo = name && logosData[name] ? `<img src="${logosData[name]}" style="width:32px; height:32px; object-fit:contain; margin-right:12px; margin-top:25px;">` : `<div style="width:32px; height:32px; margin-right:12px;"></div>`;
+                let logoToUse = logosData[name] || tempDefaultLogo;
+                let logo = name && logoToUse ? `<img src="${logoToUse}" style="width:32px; height:32px; object-fit:contain; margin-right:12px; margin-top:25px;">` : `<div style="width:32px; height:32px; margin-right:12px;"></div>`;
                 let rowBg = name ? `background: ${TPL_STYLE.cardBg}; border: ${TPL_STYLE.cardBorder};` : `background: transparent; border: 1.5px solid transparent;`;
 
                 return `<div style="display: grid; grid-template-columns: ${gridLayout}; align-items: center; ${rowBg} border-radius: 10px; height: 54px; padding: 0 12px; font-size: 22px; font-weight: 800; color: ${TPL_STYLE.textColor}; box-sizing: border-box;">
@@ -612,6 +637,7 @@
         async function loadRostersTab() {
             const res = await fetch(`/api/data`); const data = await res.json();
             currentTeams = data.teams; rostersData = data.rosters || {}; logosData = data.logos || {};
+            if(data.defaultLogo) tempDefaultLogo = data.defaultLogo;
             const container = document.getElementById('rostersContainer'); container.innerHTML = '';
             
             if(currentTeams.length === 0) { 
@@ -622,7 +648,11 @@
             currentTeams.forEach((team, idx) => {
                 let slotNum = idx + 3;
                 if(!rostersData[team]) rostersData[team] = ["", "", "", "", ""];
-                let r = rostersData[team]; let currentLogo = logosData[team] || "";
+                let r = rostersData[team]; 
+                
+                // Varsayılan Logo devrede
+                let currentLogo = logosData[team] || tempDefaultLogo || "";
+                
                 let hasSub = activeSubMenu[team] || (r[4] && r[4].trim() !== "");
                 let safeTeam = team.replace(/'/g, "\\'");
 
@@ -669,7 +699,7 @@
             currentTeams = data.teams || [];
             
             if(currentTeams.length >= 23) {
-                alert("⚠️ Maksimum takım sınırına (23 takım / Slot 25) ulaşıldı! Daha fazla takım ekleyemezsiniz.");
+                alert("⚠️ Maksimum takım sınırına (23 takım) ulaşıldı! Daha fazla takım ekleyemezsiniz.");
                 return;
             }
 
@@ -680,13 +710,19 @@
 
             currentTeams.push(teamName);
 
-            await fetch('/api/teams', { 
+            const teamRes = await fetch('/api/teams', { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ teamList: currentTeams.join('\n') }) 
+                body: JSON.stringify({ teamList: teamName }) 
             });
+            const resData = await teamRes.json();
+
+            if (!resData.success) {
+                alert(resData.message || "Takım eklenirken bir hata oluştu!");
+                return;
+            }
+
             input.value = '';
-            
             loadRostersTab();
             alert(`"${teamName}" başarıyla eklendi!`);
         }
@@ -720,6 +756,27 @@
                     canvas.width = 256; canvas.height = 256; ctx.drawImage(img, 0, 0, 256, 256);
                     tempTournamentLogo = canvas.toDataURL('image/png');
                     document.getElementById('tournamentLogoPreview').innerHTML = `<img src="${tempTournamentLogo}" class="w-full h-full object-contain">`;
+                }; img.src = e.target.result;
+            }; reader.readAsDataURL(file);
+        }
+
+        // YENİ: Varsayılan Takım Logosu Yükleme
+        async function uploadDefaultLogo(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = async function() {
+                    const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+                    canvas.width = 256; canvas.height = 256; ctx.drawImage(img, 0, 0, 256, 256);
+                    tempDefaultLogo = canvas.toDataURL('image/png');
+                    document.getElementById('defaultLogoPreview').innerHTML = `<img src="${tempDefaultLogo}" class="w-full h-full object-contain">`;
+                    
+                    await fetch('/api/default-logo', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ defaultLogo: tempDefaultLogo })
+                    });
                 }; img.src = e.target.result;
             }; reader.readAsDataURL(file);
         }
@@ -763,6 +820,8 @@
             logosData = data.logos || {}; 
             mvpsData = data.mvps || [];
             currentlySpectating = data.spectating || "";
+            if(data.defaultLogo) tempDefaultLogo = data.defaultLogo;
+            
             showAliveGlobal = data.settings && data.settings.showAlive !== undefined ? data.settings.showAlive : true;
             showManualStatusGlobal = data.settings && data.settings.showManualStatus !== undefined ? data.settings.showManualStatus : true;
             
@@ -776,7 +835,10 @@
                 if(!aliveStatus[team]) aliveStatus[team] = [3, 3, 3, 3];
                 if(manualStatusData[team] === undefined) manualStatusData[team] = false;
 
-                let isSpec = currentlySpectating === team; let logo = logosData[team] || "";
+                // Varsayılan Logo devrede
+                let logo = logosData[team] || tempDefaultLogo || "";
+                
+                let isSpec = currentlySpectating === team;
                 let safeTeam = team.replace(/'/g, "\\'");
 
                 let aliveTd = '';
@@ -892,7 +954,7 @@
                 if(totalEl) totalEl.innerText = t.score; 
             });
 
-            socket.emit('liveUpdate', { scores: matchScores, leaderboard, alive: aliveStatus, manualStatus: manualStatusData, logos: logosData, teams: currentTeams });
+            socket.emit('liveUpdate', { scores: matchScores, leaderboard, alive: aliveStatus, manualStatus: manualStatusData, logos: logosData, defaultLogo: tempDefaultLogo, teams: currentTeams });
         }
 
         function calculateLeaderboard() {
@@ -922,7 +984,7 @@
                 const totalEl = document.getElementById(`total-${tIndex}`); 
                 if(totalEl) totalEl.innerText = t.score; 
             });
-            socket.emit('liveUpdate', { scores: matchScores, leaderboard, alive: aliveStatus, manualStatus: manualStatusData, logos: logosData, teams: currentTeams });
+            socket.emit('liveUpdate', { scores: matchScores, leaderboard, alive: aliveStatus, manualStatus: manualStatusData, logos: logosData, defaultLogo: tempDefaultLogo, teams: currentTeams });
         }
 
         async function loadSettingsData() {
@@ -931,10 +993,16 @@
             if (data.settings.showAlive !== undefined) document.getElementById('showAliveSelect').value = data.settings.showAlive.toString();
             if (data.settings.showManualStatus !== undefined) document.getElementById('showManualStatusSelect').value = data.settings.showManualStatus.toString();
             if (data.settings.showMarquee !== undefined) document.getElementById('showMarqueeSelect').value = data.settings.showMarquee.toString();
+            
             if (data.tournamentLogo) {
                 tempTournamentLogo = data.tournamentLogo;
                 document.getElementById('tournamentLogoPreview').innerHTML = `<img src="${data.tournamentLogo}" class="w-full h-full object-contain">`;
             }
+            if (data.defaultLogo) {
+                tempDefaultLogo = data.defaultLogo;
+                document.getElementById('defaultLogoPreview').innerHTML = `<img src="${data.defaultLogo}" class="w-full h-full object-contain">`;
+            }
+            
             let current = data.settings.currentMatch || "MATCH 1 / ERANGEL"; let parts = current.split('/');
             if(parts.length >= 2) { document.getElementById('matchNumSelect').value = parts[0].trim(); document.getElementById('mapNameSelect').value = parts[1].trim(); }
         }
@@ -963,8 +1031,7 @@
                     currentMatch: combinedMatch, 
                     showAlive: showAliveVal, 
                     showManualStatus: showManualStatusVal,
-                    showMarquee: showMarqueeVal,
-                    tournamentLogo: tempTournamentLogo 
+                    showMarquee: showMarqueeVal
                 }) 
             });
 
@@ -977,23 +1044,33 @@
         }
 
         async function saveTeams() {
-            const rawText = document.getElementById('teamInput').value;
-            if(!rawText.trim()) return;
-            const lines = rawText.split('\n').map(t => t.trim()).filter(t => t.length > 0);
+            const rawText = document.getElementById('teamInput').value.trim();
+            if(!rawText) return;
 
-            if(lines.length > 23) {
-                alert(`⚠️ HATA: Toplam takım sayısı 23'ü (Slot 25) aşamaz! Girdiğiniz liste ${lines.length} takım içeriyor.`);
-                return;
+            if (rawText === "SIFIRLA") {
+                if (!confirm("⚠️ DİKKAT: Tüm takımlar, puanlar ve veriler kalıcı olarak sıfırlanacak! Onaylıyor musunuz?")) return;
             }
 
-            await fetch('/api/teams', { 
+            const res = await fetch('/api/teams', { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify({ teamList: rawText }) 
             });
+            const data = await res.json();
+
+            if (!data.success) {
+                alert(data.message || "Bir hata oluştu!");
+                return;
+            }
+
             document.getElementById('teamInput').value = ''; 
             switchTab('tab-spreadsheet', document.querySelectorAll('#sidebarNav button')[2]);
-            alert("Takım havuzu başarıyla kaydedildi!");
+            
+            if (rawText === "SIFIRLA") {
+                alert("Sistem başarıyla sıfırlandı!");
+            } else {
+                alert("Takımlar başarıyla eklendi ve güncellendi!");
+            }
         }
     </script>
 </body>

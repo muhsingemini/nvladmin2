@@ -116,7 +116,7 @@
         .lb-row {
             display: flex; align-items: center; padding: 0 15px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            font-size: 1rem; font-weight: 700; height: 34px; box-sizing: border-box;
+            font-size: 1rem; font-weight: 700; height: 70px; box-sizing: border-box;
             background: #000000;
             transition: all 0.3s;
         }
@@ -194,6 +194,7 @@
         let globalAlive = {};
         let globalManualStatus = {};
         let globalLogos = {};
+        let globalDefaultLogo = ""; 
         let globalLeaderboard = [];
         let allRegisteredTeams = [];
         let alertTimeout = null;
@@ -217,6 +218,7 @@
             if (data.alive) globalAlive = data.alive;
             if (data.manualStatus) globalManualStatus = data.manualStatus;
             if (data.logos) globalLogos = { ...globalLogos, ...data.logos };
+            if (data.defaultLogo !== undefined) globalDefaultLogo = data.defaultLogo; 
             
             if (data.leaderboard) {
                 globalLeaderboard = data.leaderboard;
@@ -229,6 +231,12 @@
         socket.on('tourLogoUpdate', (data) => {
             const wrap = document.getElementById('tourLogoWrap');
             wrap.innerHTML = data.tournamentLogo ? `<img src="${data.tournamentLogo}">` : ``;
+        });
+
+        socket.on('defaultLogoUpdate', (data) => {
+            globalDefaultLogo = data.defaultLogo;
+            renderLeaderboard();
+            updateMarquee();
         });
 
         socket.on('aliveUpdate', (data) => { globalAlive = data.alive; renderLeaderboard(); });
@@ -275,7 +283,7 @@
             document.getElementById('eaPts').innerText = foundTeam ? (foundTeam.score || 0) : 0;
 
             const logoWrap = document.getElementById('eaLogoWrap');
-            let logo = globalLogos[teamName] || "";
+            let logo = globalLogos[teamName] || globalDefaultLogo || "";
             logoWrap.innerHTML = logo ? `<img src="${logo}">` : `<span style="font-size:1.2rem;">⚡</span>`;
 
             alertBox.style.display = 'flex';
@@ -298,7 +306,7 @@
             let itemsHTML = "";
             for(let loop = 0; loop < 2; loop++) {
                 teamsList.forEach(team => {
-                    let teamLogo = globalLogos[team] || "";
+                    let teamLogo = globalLogos[team] || globalDefaultLogo || "";
                     let logo = teamLogo ? `<div class="marquee-logo"><img src="${teamLogo}"></div>` : ``;
                     itemsHTML += `<div class="marquee-item">${logo}<span>${team}</span></div><span style="color: var(--neon-cyan);">/</span>`;
                 });
@@ -327,7 +335,7 @@
 
                 let teamAlive = globalAlive[t.teamName] || [3,3,3,3];
                 let manualDead = globalManualStatus[t.teamName] || false;
-                let teamLogo = globalLogos[t.teamName] || "";
+                let teamLogo = globalLogos[t.teamName] || globalDefaultLogo || "";
                 let aliveBarsHTML = "";
                 
                 let isCompletelyDead = showAliveGlobal ? teamAlive.every(status => status === 1) : manualDead;
@@ -396,6 +404,7 @@
             if(data.alive) globalAlive = data.alive;
             if(data.manualStatus) globalManualStatus = data.manualStatus;
             if(data.logos) globalLogos = data.logos;
+            if(data.defaultLogo) globalDefaultLogo = data.defaultLogo; 
             
             if(data.leaderboard) { globalLeaderboard = data.leaderboard; renderLeaderboard(); }
             updateMarquee();
