@@ -12,11 +12,8 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// YENİ YÖNETİCİ BİLGİLERİ
 const ADMIN_USERNAME = "adminkensuw";
 const ADMIN_PASSWORD = "KensuwBaba9078q";
-
-// Veritabanı dosya yolu
 const DB_FILE = path.join(__dirname, 'database.json');
 
 function readDB() {
@@ -37,6 +34,7 @@ function readDB() {
                 tournamentName: "PMGO 2026 GRAND FINALS",
                 currentMatch: "MATCH 1 / ERANGEL",
                 showAlive: true,
+                showManualStatus: true,
                 showMarquee: true
             }
         };
@@ -66,35 +64,64 @@ app.post('/api/teams', (req, res) => {
     const { teamList } = req.body;
     const db = readDB();
     if (teamList) {
-        teamList.split('\n').map(t => t.trim()).filter(t => t.length > 0).forEach(team => {
-            if (!db.teams.includes(team)) {
-                db.teams.push(team);
-                if (!db.scores[team]) {
-                    db.scores[team] = Array(5).fill().map(() => ({ rank: '', kill: '' }));
-                }
-                if (!db.rosters[team]) db.rosters[team] = ["", "", "", "", ""];
-                if (!db.logos[team]) db.logos[team] = "";
-                if (!db.alive[team]) db.alive[team] = [3, 3, 3, 3];
-                if (db.manualStatus[team] === undefined) db.manualStatus[team] = false;
-            }
+        const newTeams = teamList.split('\n').map(t => t.trim()).filter(t => t.length > 0);
+        
+        if (newTeams.length > 23) {
+            return res.status(400).json({ success: false, message: "En fazla 23 takım ekleyebilirsiniz!" });
+        }
+
+        db.teams = [];
+        db.scores = {};
+        db.rosters = {};
+        db.logos = {};
+        db.alive = {};
+        db.manualStatus = {};
+
+        newTeams.forEach(team => {
+            db.teams.push(team);
+            db.scores[team] = Array(5).fill().map(() => ({ rank: '', kill: '' }));
+            db.rosters[team] = ["", "", "", "", ""];
+            db.logos[team] = "";
+            db.alive[team] = [3, 3, 3, 3];
+            db.manualStatus[team] = false;
         });
+        
+        writeDB(db);
+        
+        io.emit('liveUpdate', { 
+            scores: db.scores, 
+            leaderboard: db.leaderboard, 
+            settings: db.settings, 
+            alive: db.alive, 
+            manualStatus: db.manualStatus, 
+            logos: db.logos, 
+            tournamentLogo: db.tournamentLogo, 
+            teams: db.teams 
+        });
+
+        res.json({ success: true, teams: db.teams });
+    } else {
+        res.status(400).json({ success: false, message: "Veri gönderilmedi." });
     }
-    writeDB(db);
-    res.json({ success: true, teams: db.teams });
 });
 
 app.post('/api/remove-team', (req, res) => {
-    const { team } = req.body;
+    const teamToDelete = req.body.team;
     const db = readDB();
-    db.teams = db.teams.filter(t => t !== team);
-    delete db.scores[team];
-    delete db.rosters[team];
-    delete db.slots[team];
-    delete db.logos[team];
-    delete db.alive[team];
-    delete db.manualStatus[team];
-    writeDB(db);
-    res.json({ success: true });
+    
+    if (teamToDelete) {
+        db.teams = db.teams.filter(t => t !== teamToDelete);
+        delete db.scores[teamToDelete];
+        delete db.rosters[teamToDelete];
+        delete db.logos[teamToDelete];
+        delete db.alive[teamToDelete];
+        delete db.manualStatus[teamToDelete];
+        
+        writeDB(db);
+        return res.json({ success: true, teams: db.teams });
+    }
+    
+    res.status(400).json({ success: false, message: "Takım adı belirtilmedi." });
 });
 
 app.post('/api/rosters', (req, res) => { 
@@ -134,15 +161,11 @@ app.post('/api/settings', (req, res) => {
     db.settings.tournamentName = req.body.tournamentName;
     db.settings.currentMatch = req.body.currentMatch;
     if (req.body.showAlive !== undefined) db.settings.showAlive = req.body.showAlive;
+    if (req.body.showManualStatus !== undefined) db.settings.showManualStatus = req.body.showManualStatus;
     if (req.body.showMarquee !== undefined) db.settings.showMarquee = req.body.showMarquee;
     
     writeDB(db);
     io.emit('liveUpdate', { scores: db.scores, settings: db.settings, leaderboard: db.leaderboard, alive: db.alive, manualStatus: db.manualStatus, logos: db.logos, tournamentLogo: db.tournamentLogo, teams: db.teams });
-    res.json({ success: true });
-});
-
-app.post('/api/reset', (req, res) => {
-    if (fs.existsSync(DB_FILE)) fs.unlinkSync(DB_FILE);
     res.json({ success: true });
 });
 
