@@ -12,14 +12,13 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// TEK YÖNETİCİ BİLGİLERİ
+// YENİ YÖNETİCİ BİLGİLERİ
 const ADMIN_USERNAME = "adminkensuw";
 const ADMIN_PASSWORD = "KensuwBaba9078q";
 
 // Veritabanı dosya yolu
 const DB_FILE = path.join(__dirname, 'database.json');
 
-// Veritabanını okuyan fonksiyon
 function readDB() {
     if (!fs.existsSync(DB_FILE)) {
         const initialData = {
@@ -32,7 +31,7 @@ function readDB() {
             rosters: {},
             logos: {},
             alive: {},
-            defaultLogo: "", 
+            manualStatus: {},
             tournamentLogo: "",
             settings: {
                 tournamentName: "PMGO 2026 GRAND FINALS",
@@ -46,12 +45,10 @@ function readDB() {
     return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
 }
 
-// Veritabanına yazan fonksiyon
 function writeDB(data) {
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
 }
 
-// Giriş API'si
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
@@ -72,10 +69,13 @@ app.post('/api/teams', (req, res) => {
         teamList.split('\n').map(t => t.trim()).filter(t => t.length > 0).forEach(team => {
             if (!db.teams.includes(team)) {
                 db.teams.push(team);
-                db.scores[team] = Array(5).fill().map(() => ({ rank: '', kill: '' }));
-                db.rosters[team] = ["", "", "", "", ""];
-                db.logos[team] = db.defaultLogo || "";
-                db.alive[team] = [3, 3, 3, 3];
+                if (!db.scores[team]) {
+                    db.scores[team] = Array(5).fill().map(() => ({ rank: '', kill: '' }));
+                }
+                if (!db.rosters[team]) db.rosters[team] = ["", "", "", "", ""];
+                if (!db.logos[team]) db.logos[team] = "";
+                if (!db.alive[team]) db.alive[team] = [3, 3, 3, 3];
+                if (db.manualStatus[team] === undefined) db.manualStatus[team] = false;
             }
         });
     }
@@ -92,6 +92,7 @@ app.post('/api/remove-team', (req, res) => {
     delete db.slots[team];
     delete db.logos[team];
     delete db.alive[team];
+    delete db.manualStatus[team];
     writeDB(db);
     res.json({ success: true });
 });
@@ -110,20 +111,6 @@ app.post('/api/logo', (req, res) => {
     writeDB(db);
     io.emit('logoUpdate', { logos: db.logos });
     res.json({ success: true }); 
-});
-
-app.post('/api/default-logo', (req, res) => {
-    const { defaultLogo } = req.body;
-    const db = readDB();
-    db.defaultLogo = defaultLogo;
-    db.teams.forEach(team => {
-        if (!db.logos[team] || db.logos[team] === "") {
-            db.logos[team] = defaultLogo;
-        }
-    });
-    writeDB(db);
-    io.emit('logoUpdate', { logos: db.logos });
-    res.json({ success: true });
 });
 
 app.post('/api/tournament-logo', (req, res) => {
@@ -150,7 +137,7 @@ app.post('/api/settings', (req, res) => {
     if (req.body.showMarquee !== undefined) db.settings.showMarquee = req.body.showMarquee;
     
     writeDB(db);
-    io.emit('liveUpdate', { settings: db.settings, leaderboard: db.leaderboard, alive: db.alive, logos: db.logos, tournamentLogo: db.tournamentLogo });
+    io.emit('liveUpdate', { scores: db.scores, settings: db.settings, leaderboard: db.leaderboard, alive: db.alive, manualStatus: db.manualStatus, logos: db.logos, tournamentLogo: db.tournamentLogo, teams: db.teams });
     res.json({ success: true });
 });
 
@@ -165,8 +152,9 @@ io.on('connection', (socket) => {
         db.scores = data.scores;
         db.leaderboard = data.leaderboard;
         if(data.alive) db.alive = data.alive;
+        if(data.manualStatus) db.manualStatus = data.manualStatus;
         writeDB(db);
-        io.emit('liveUpdate', { scores: db.scores, leaderboard: db.leaderboard, settings: db.settings, alive: db.alive, logos: db.logos, tournamentLogo: db.tournamentLogo });
+        io.emit('liveUpdate', { scores: db.scores, leaderboard: db.leaderboard, settings: db.settings, alive: db.alive, manualStatus: db.manualStatus, logos: db.logos, tournamentLogo: db.tournamentLogo, teams: db.teams });
     });
 
     socket.on('aliveUpdate', (data) => {
@@ -176,12 +164,25 @@ io.on('connection', (socket) => {
         io.emit('aliveUpdate', { alive: db.alive });
     });
 
+    socket.on('manualStatusUpdate', (data) => {
+        const db = readDB();
+        db.manualStatus = data.manualStatus;
+        writeDB(db);
+        io.emit('manualStatusUpdate', { manualStatus: db.manualStatus });
+    });
+
+    socket.on('triggerAlert', (data) => {
+        io.emit('triggerAlert', data);
+    });
+
     socket.on('setSpectate', (data) => {
-        const teamName = (typeof data === 'object' && data.teamName) ? data.teamName : data;
+        let teamName = (typeof data === 'object' && data.teamName !== undefined) ? data.teamName : data;
+        if (!teamName) teamName = null;
+        
         const db = readDB();
         db.spectating = teamName;
         writeDB(db);
-        io.emit('spectateUpdate', { team: teamName, logo: db.logos[teamName] || "" });
+        io.emit('spectateUpdate', { team: teamName, logo: teamName ? (db.logos[teamName] || "") : "" });
     });
 });
 

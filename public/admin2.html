@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NVL Pubg Yönetim Paneli</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -97,30 +98,29 @@
                 <table class="w-full text-sm text-left whitespace-nowrap">
                     <thead class="bg-gray-950/95 border-b border-gray-800 text-gray-300 uppercase tracking-wider text-xs">
                         <tr>
-                            <th class="px-6 py-4 font-black w-56" rowspan="2">Takım Adı</th>
-                            <th class="px-4 py-4 text-center w-32" rowspan="2">Yayın Kontrol</th>
-                            <th id="thAliveCol" class="px-4 py-4 text-center w-36" rowspan="2">Oyuncu Durumu</th>
-                            <th id="thStatusCol" class="px-4 py-4 text-center w-32" rowspan="2">Takım Durumu</th>
+                            <th class="px-5 py-3.5 font-black w-48" rowspan="2">Takım Adı</th>
+                            <th class="px-3 py-3.5 text-center w-28" rowspan="2">Yayın Kontrol</th>
+                            <th id="thAliveCol" class="px-3 py-3.5 text-center w-32" rowspan="2">Oyuncu Durumu</th>
                             
-                            <th class="px-3.5 py-3 text-center bg-amber-950/20 border-l border-gray-800 font-black text-amber-400" colspan="2">MAÇ 1</th>
-                            <th class="px-3.5 py-3 text-center bg-gray-900/30 border-l border-gray-800 font-black text-amber-400" colspan="2">MAÇ 2</th>
-                            <th class="px-3.5 py-3 text-center bg-amber-950/20 border-l border-gray-800 font-black text-amber-400" colspan="2">MAÇ 3</th>
-                            <th class="px-3.5 py-3 text-center bg-gray-900/30 border-l border-gray-800 font-black text-amber-400" colspan="2">MAÇ 4</th>
-                            <th class="px-3.5 py-3 text-center bg-amber-950/20 border-l border-gray-800 font-black text-amber-400" colspan="2">MAÇ 5</th>
+                            <th class="px-2 py-2.5 text-center bg-amber-950/20 border-l border-gray-800 font-black text-amber-400 text-[11px]" colspan="2">MAÇ 1</th>
+                            <th class="px-2 py-2.5 text-center bg-gray-900/30 border-l border-gray-800 font-black text-amber-400 text-[11px]" colspan="2">MAÇ 2</th>
+                            <th class="px-2 py-2.5 text-center bg-amber-950/20 border-l border-gray-800 font-black text-amber-400 text-[11px]" colspan="2">MAÇ 3</th>
+                            <th class="px-2 py-2.5 text-center bg-gray-900/30 border-l border-gray-800 font-black text-amber-400 text-[11px]" colspan="2">MAÇ 4</th>
+                            <th class="px-2 py-2.5 text-center bg-amber-950/20 border-l border-gray-800 font-black text-amber-400 text-[11px]" colspan="2">MAÇ 5</th>
                             
-                            <th class="px-6 py-4 text-center text-amber-400 font-black border-l border-gray-800" rowspan="2">TOPLAM</th>
+                            <th class="px-3 py-3.5 text-center text-amber-400 font-black border-l border-gray-800 w-24" rowspan="2">TOPLAM</th>
                         </tr>
                         <tr class="bg-gray-950/60 text-[10px] text-gray-400 border-b border-gray-800">
-                            <th class="py-2 text-center text-amber-400 bg-amber-950/10 border-l border-gray-800 w-16">KILL</th>
-                            <th class="py-2 text-center text-cyan-400 bg-amber-950/10 w-16">SIRA</th>
-                            <th class="py-2 text-center text-amber-400 bg-gray-900/20 border-l border-gray-800 w-16">KILL</th>
-                            <th class="py-2 text-center text-cyan-400 bg-gray-900/20 w-16">SIRA</th>
-                            <th class="py-2 text-center text-amber-400 bg-amber-950/10 border-l border-gray-800 w-16">KILL</th>
-                            <th class="py-2 text-center text-cyan-400 bg-amber-950/10 w-16">SIRA</th>
-                            <th class="py-2 text-center text-amber-400 bg-gray-900/20 border-l border-gray-800 w-16">KILL</th>
-                            <th class="py-2 text-center text-cyan-400 bg-gray-900/20 w-16">SIRA</th>
-                            <th class="py-2 text-center text-amber-400 bg-amber-950/10 border-l border-gray-800 w-16">KILL</th>
-                            <th class="py-2 text-center text-cyan-400 bg-amber-950/10 w-16">SIRA</th>
+                            <th class="py-1.5 text-center text-amber-400 bg-amber-950/10 border-l border-gray-800 w-16">KILL</th>
+                            <th class="py-1.5 text-center text-cyan-400 bg-amber-950/10 w-16">SIRA</th>
+                            <th class="py-1.5 text-center text-amber-400 bg-gray-900/20 border-l border-gray-800 w-16">KILL</th>
+                            <th class="py-1.5 text-center text-cyan-400 bg-gray-900/20 w-16">SIRA</th>
+                            <th class="py-1.5 text-center text-amber-400 bg-amber-950/10 border-l border-gray-800 w-16">KILL</th>
+                            <th class="py-1.5 text-center text-cyan-400 bg-amber-950/10 w-16">SIRA</th>
+                            <th class="py-1.5 text-center text-amber-400 bg-gray-900/20 border-l border-gray-800 w-16">KILL</th>
+                            <th class="py-1.5 text-center text-cyan-400 bg-gray-900/20 w-16">SIRA</th>
+                            <th class="py-1.5 text-center text-amber-400 bg-amber-950/10 border-l border-gray-800 w-16">KILL</th>
+                            <th class="py-1.5 text-center text-cyan-400 bg-amber-950/10 w-16">SIRA</th>
                         </tr>
                     </thead>
                     <tbody id="scoreTableBody" class="divide-y divide-gray-900"></tbody>
@@ -225,9 +225,7 @@
                         <select id="mapNameSelect" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-4 text-white font-bold outline-none cursor-pointer">
                             <option value="ERANGEL">ERANGEL</option>
                             <option value="MIRAMAR">MIRAMAR</option>
-                            <option value="SANHOK">SANHOK</option>
-                            <option value="VIKENDI">VIKENDI</option>
-                            <option value="LIVIK">LIVIK</option>
+                            <option value="RONDO">RONDO</option>
                         </select>
                     </div>
                 </div>
@@ -240,7 +238,7 @@
         let currentUser = localStorage.getItem('pmgo_user');
         let socket;
 
-        if (!currentUser || currentUser !== 'adminkensuw') {
+        if (!currentUser || currentUser !== 'adminmuhsin') {
             document.getElementById('loginModal').style.display = 'flex';
         } else {
             document.getElementById('loginModal').style.display = 'none';
@@ -287,7 +285,6 @@
                 if(data.scores) matchScores = data.scores;
                 if(data.teams) currentTeams = data.teams;
                 if(data.alive) aliveStatus = data.alive;
-                if(data.manualStatus) teamManualStatus = data.manualStatus;
                 if(data.logos) logosData = { ...logosData, ...data.logos };
             });
 
@@ -295,7 +292,7 @@
         }
 
         const placementPoints = { 1: 10, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1, 8: 1 };
-        let currentTeams = [], matchScores = {}, mvpsData = [], rostersData = {}, logosData = {}, aliveStatus = {}, teamManualStatus = {}, currentlySpectating = "";
+        let currentTeams = [], matchScores = {}, mvpsData = [], rostersData = {}, logosData = {}, aliveStatus = {}, currentlySpectating = "";
         let activeSubMenu = {};
         let tempTournamentLogo = "";
         let showAliveGlobal = true;
@@ -361,24 +358,23 @@
             let rightCol = displayTeams.slice(9, 18);
             const gridLayout = "80px 1fr 90px 90px 90px 100px";
 
-            function generateRow(t, index) {
+           function generateRow(t, index) {
                 let rank = index + 1;
                 let name = t.teamName || "";
-                let logo = name && logosData[name] ? `<img src="${logosData[name]}" style="width:35px; height:35px; object-fit:contain; margin-right:15px; filter:drop-shadow(0 0 5px rgba(255,255,255,0.3)); flex-shrink: 0;">` : (name ? `<div style="width:35px; height:35px; margin-right:15px; flex-shrink: 0;"></div>` : ``);
+                let logo = name && logosData[name] ? '<img src="' + logosData[name] + '" style="width:35px; height:35px; object-fit:contain; margin-right:15px; filter:drop-shadow(0 0 5px rgba(255,255,255,0.3)); flex-shrink: 0;">' : (name ? '<div style="width:35px; height:35px; margin-right:15px; flex-shrink: 0;"></div>' : '');
                 let wwcd = t.wins !== undefined && t.wins !== "" ? t.wins : (name ? "0" : "");
                 let place = t.placeScore !== undefined && t.placeScore !== "" ? t.placeScore : (name ? "0" : "");
                 let kills = t.kills !== undefined && t.kills !== "" ? t.kills : (name ? "0" : "");
                 let total = t.score !== undefined && t.score !== "" ? t.score : (name ? "0" : "");
 
-                return `
-                <div style="display: grid; grid-template-columns: ${gridLayout}; align-items: center; padding: 12px 0; font-size: 26px; font-weight: 800; color: white; letter-spacing: 1px;">
-                    <div style="display: flex; justify-content: center;"><span style="${name ? 'border-bottom: 4px solid white; padding: 0 10px;' : ''}">${name ? rank : ''}</span></div>
-                    <div style="display: flex; align-items: center; padding-left: 15px; text-transform: uppercase; overflow: hidden;">${logo}<div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${name}</div></div>
-                    <div style="text-align: center;">${wwcd}</div>
-                    <div style="text-align: center;">${place}</div>
-                    <div style="text-align: center;">${kills}</div>
-                    <div style="text-align: center;">${total}</div>
-                </div>`;
+                return '<div style="display: grid; grid-template-columns: ' + gridLayout + '; align-items: center; padding-top: 4px; padding-bottom: 15px; font-size: 26px; font-weight: 800; color: white; letter-spacing: 1px;">' +
+                    '<div style="display: flex; justify-content: center;"><span style="' + (name ? 'border-bottom: 4px solid white; padding: 0 10px;' : '') + '">' + (name ? rank : '') + '</span></div>' +
+                    '<div style="display: flex; align-items: center; padding-left: 15px; text-transform: uppercase; overflow: hidden;">' + logo + '<div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + name + '</div></div>' +
+                    '<div style="text-align: center;">' + wwcd + '</div>' +
+                    '<div style="text-align: center;">' + place + '</div>' +
+                    '<div style="text-align: center;">' + kills + '</div>' +
+                    '<div style="text-align: center;">' + total + '</div>' +
+                '</div>';
             }
 
             let headerHTML = `
@@ -568,50 +564,45 @@
             currentTeams = data.teams || []; 
             matchScores = data.scores || {}; 
             aliveStatus = data.alive || {}; 
-            teamManualStatus = data.manualStatus || {}; 
             logosData = data.logos || {}; 
             currentlySpectating = data.spectating || "";
             showAliveGlobal = data.settings && data.settings.showAlive !== undefined ? data.settings.showAlive : true;
             
             document.getElementById('thAliveCol').style.display = showAliveGlobal ? '' : 'none';
-            document.getElementById('thStatusCol').style.display = !showAliveGlobal ? '' : 'none';
             const tbody = document.getElementById('scoreTableBody'); tbody.innerHTML = '';
 
             currentTeams.forEach((team, tIndex) => {
                 if(!aliveStatus[team]) aliveStatus[team] = [3, 3, 3, 3];
-                if(teamManualStatus[team] === undefined) teamManualStatus[team] = false;
                 let isSpec = currentlySpectating === team; let logo = logosData[team] || "";
                 let safeTeam = team.replace(/'/g, "\\'");
 
-                let aliveTd = showAliveGlobal ? `<td class="px-4 py-4 text-center"><div class="flex justify-center gap-1.5">${[0,1,2,3].map(pIdx => {
+                let aliveTd = showAliveGlobal ? `<td class="px-3 py-3 text-center"><div class="flex justify-center gap-1">${[0,1,2,3].map(pIdx => {
                     let status = aliveStatus[team][pIdx] !== undefined ? aliveStatus[team][pIdx] : 3;
                     let colorClass = status === 3 ? 'bg-green-500' : (status === 2 ? 'bg-yellow-500' : 'bg-red-600');
-                    return `<div onclick="cycleAliveStatus('${safeTeam}', ${pIdx}, ${tIndex})" id="box-${tIndex}-${pIdx}" class="w-5 h-7 rounded ${colorClass} cursor-pointer border border-black shadow"></div>`;
+                    return `<div onclick="cycleAliveStatus('${safeTeam}', ${pIdx}, ${tIndex})" id="box-${tIndex}-${pIdx}" class="w-4 h-6 rounded ${colorClass} cursor-pointer border border-black shadow"></div>`;
                 }).join('')}</div></td>` : `<td style="display:none;"></td>`;
 
-                let statusTd = !showAliveGlobal ? `<td class="px-4 py-4 text-center"><button onclick="toggleManualStatus('${safeTeam}', ${tIndex})" id="status-btn-${tIndex}" class="px-3 py-1.5 rounded-lg text-xs font-black ${teamManualStatus[team] ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}">${teamManualStatus[team] ? '🔴 ELENDİ' : '🟢 HAYATTA'}</button></td>` : `<td style="display:none;"></td>`;
-
                 let row = `<tr class="hover:bg-gray-900/60 transition-all border-b border-gray-900">
-                    <td class="px-6 py-4 font-black text-white flex items-center gap-3">
-                        <div class="w-8 h-8 bg-gray-950 border border-gray-800 rounded flex items-center justify-center overflow-hidden shrink-0">${logo ? `<img src="${logo}" class="w-full h-full object-contain">` : ``}</div>
-                        <span class="truncate max-w-[150px]">${team}</span>
+                    <td class="px-5 py-3 font-black text-white flex items-center gap-2.5">
+                        <div class="w-7 h-7 bg-gray-950 border border-gray-800 rounded flex items-center justify-center overflow-hidden shrink-0">${logo ? `<img src="${logo}" class="w-full h-full object-contain">` : ``}</div>
+                        <span class="truncate max-w-[130px]" title="${team}">${team}</span>
                     </td>
-                    <td class="px-4 py-4 text-center"><button onclick="setSpectateTeam('${safeTeam}')" id="spec-btn-${tIndex}" class="px-4 py-2 ${isSpec ? 'spectating-active' : 'bg-gray-800 hover:bg-amber-600'} rounded-lg text-xs font-bold text-white">🎥 ${isSpec ? 'YAYINDA' : 'İzle'}</button></td>
-                    ${aliveTd}${statusTd}`;
+                    <td class="px-3 py-3 text-center"><button onclick="setSpectateTeam('${safeTeam}')" id="spec-btn-${tIndex}" class="px-3 py-1.5 ${isSpec ? 'spectating-active' : 'bg-gray-800 hover:bg-amber-600'} rounded-lg text-xs font-bold text-white">🎥 ${isSpec ? 'YAYINDA' : 'İzle'}</button></td>
+                    ${aliveTd}`;
                 
                 for(let mIndex=0; mIndex<5; mIndex++) {
                     let match = (matchScores[team] && matchScores[team][mIndex]) ? matchScores[team][mIndex] : {kill:'', rank:''};
                     let bgCol = mIndex % 2 === 0 ? 'bg-amber-950/10' : 'bg-gray-900/10';
                     
                     row += `
-                    <td class="px-2 py-4 text-center ${bgCol} border-l border-gray-800">
-                        <input type="number" id="kill-${tIndex}-${mIndex}" value="${match.kill}" oninput="handleInput('${safeTeam}', ${tIndex}, ${mIndex}, 'kill', this.value)" placeholder="Kill" class="w-14 bg-gray-950 border border-amber-500/40 focus:border-amber-400 rounded text-center py-1.5 text-amber-300 font-bold text-sm outline-none">
+                    <td class="px-1.5 py-3 text-center ${bgCol} border-l border-gray-800">
+                        <input type="number" id="kill-${tIndex}-${mIndex}" value="${match.kill}" oninput="handleInput('${safeTeam}', ${tIndex}, ${mIndex}, 'kill', this.value)" placeholder="Kill" class="w-16 bg-gray-950 border border-amber-500/40 focus:border-amber-400 rounded-lg text-center py-2 text-amber-300 font-extrabold text-base outline-none">
                     </td>
-                    <td class="px-2 py-4 text-center ${bgCol}">
-                        <input type="number" id="rank-${tIndex}-${mIndex}" value="${match.rank}" oninput="handleInput('${safeTeam}', ${tIndex}, ${mIndex}, 'rank', this.value)" placeholder="Sıra" class="w-14 bg-gray-950 border border-cyan-500/40 focus:border-cyan-400 rounded text-center py-1.5 text-cyan-300 font-bold text-sm outline-none">
+                    <td class="px-1.5 py-3 text-center ${bgCol}">
+                        <input type="number" id="rank-${tIndex}-${mIndex}" value="${match.rank}" oninput="handleInput('${safeTeam}', ${tIndex}, ${mIndex}, 'rank', this.value)" placeholder="Sıra" class="w-16 bg-gray-950 border border-cyan-500/40 focus:border-cyan-400 rounded-lg text-center py-2 text-cyan-300 font-extrabold text-base outline-none">
                     </td>`;
                 }
-                row += `<td class="px-6 py-4 text-center font-black text-2xl text-amber-400 border-l border-gray-800" id="total-${tIndex}">0</td></tr>`;
+                row += `<td class="px-3 py-3 text-center font-bold text-sm text-amber-400 border-l border-gray-800 w-24" id="total-${tIndex}">0</td></tr>`;
                 tbody.innerHTML += row;
             }); 
             calculateAll();
@@ -620,15 +611,14 @@
         function setSpectateTeam(teamName) { 
             currentlySpectating = (currentlySpectating === teamName) ? "" : teamName; 
             
-            // Butonların görsel durumunu hemen güncelle
             currentTeams.forEach((team, idx) => {
                 const btn = document.getElementById(`spec-btn-${idx}`);
                 if(btn) {
                     if(team === currentlySpectating) {
-                        btn.className = "px-4 py-2 spectating-active rounded-lg text-xs font-bold text-white";
+                        btn.className = "px-3 py-1.5 spectating-active rounded-lg text-xs font-bold text-white";
                         btn.innerHTML = "🎥 YAYINDA";
                     } else {
-                        btn.className = "px-4 py-2 bg-gray-800 hover:bg-amber-600 rounded-lg text-xs font-bold text-white";
+                        btn.className = "px-3 py-1.5 bg-gray-800 hover:bg-amber-600 rounded-lg text-xs font-bold text-white";
                         btn.innerHTML = "🎥 İzle";
                     }
                 }
@@ -637,36 +627,16 @@
             socket.emit('setSpectate', { teamName: currentlySpectating }); 
         }
 
-        function triggerEliminatedAlert(team) {
-            calculateAll();
-            let foundTeam = calculateLeaderboard().find(t => t.teamName === team);
-            let kills = foundTeam ? foundTeam.kills : 0;
-            let score = foundTeam ? foundTeam.score : 0;
-            socket.emit('triggerAlert', { team: team, kills: kills, score: score });
-        }
-
         function cycleAliveStatus(team, pIdx, tIndex) {
             if(!aliveStatus[team]) aliveStatus[team] = [3,3,3,3];
-            let prevDead = aliveStatus[team].every(v => v === 1);
-            let current = aliveStatus[team][pIdx]; let next = current === 3 ? 2 : (current === 2 ? 1 : 3);
+            let current = aliveStatus[team][pIdx]; 
+            let next = current === 3 ? 2 : (current === 2 ? 1 : 3);
             aliveStatus[team][pIdx] = next;
-            const box = document.getElementById(`box-${tIndex}-${pIdx}`);
-            if(box) box.className = `w-5 h-7 rounded cursor-pointer border border-black shadow ${next === 3 ? 'bg-green-500' : (next === 2 ? 'bg-yellow-500' : 'bg-red-600')}`;
-            let nowDead = aliveStatus[team].every(v => v === 1);
-            if (!prevDead && nowDead) triggerEliminatedAlert(team);
-            socket.emit('aliveUpdate', { alive: aliveStatus });
-        }
 
-        function toggleManualStatus(team, tIndex) {
-            if(teamManualStatus[team] === undefined) teamManualStatus[team] = false;
-            teamManualStatus[team] = !teamManualStatus[team];
-            const btn = document.getElementById(`status-btn-${tIndex}`);
-            if(btn) {
-                btn.className = `px-3 py-1.5 rounded-lg text-xs font-black ${teamManualStatus[team] ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`;
-                btn.innerText = teamManualStatus[team] ? '🔴 ELENDİ' : '🟢 HAYATTA';
-            }
-            socket.emit('manualStatusUpdate', { manualStatus: teamManualStatus });
-            if (teamManualStatus[team]) triggerEliminatedAlert(team);
+            const box = document.getElementById(`box-${tIndex}-${pIdx}`);
+            if(box) box.className = `w-4 h-6 rounded cursor-pointer border border-black shadow ${next === 3 ? 'bg-green-500' : (next === 2 ? 'bg-yellow-500' : 'bg-red-600')}`;
+            
+            socket.emit('aliveUpdate', { alive: aliveStatus });
             calculateAll();
         }
 
@@ -682,7 +652,7 @@
                 if(totalEl) totalEl.innerText = t.score; 
             });
 
-            socket.emit('liveUpdate', { scores: matchScores, leaderboard, alive: aliveStatus, manualStatus: teamManualStatus, logos: logosData, teams: currentTeams });
+            socket.emit('liveUpdate', { scores: matchScores, leaderboard, alive: aliveStatus, logos: logosData, teams: currentTeams });
         }
 
         function calculateLeaderboard() {
@@ -712,7 +682,7 @@
                 const totalEl = document.getElementById(`total-${tIndex}`); 
                 if(totalEl) totalEl.innerText = t.score; 
             });
-            socket.emit('liveUpdate', { scores: matchScores, leaderboard, alive: aliveStatus, manualStatus: teamManualStatus, logos: logosData, teams: currentTeams });
+            socket.emit('liveUpdate', { scores: matchScores, leaderboard, alive: aliveStatus, logos: logosData, teams: currentTeams });
         }
 
         async function loadSettingsData() {
@@ -754,6 +724,12 @@
                     tournamentLogo: tempTournamentLogo 
                 }) 
             });
+
+            showAliveGlobal = showAliveVal;
+            document.getElementById('thAliveCol').style.display = showAliveGlobal ? '' : 'none';
+            
+            isTableLoaded = false;
+            loadTableStructure();
 
             alert("Ayarlar ve Turnuva Logosu başarıyla güncellendi!");
         }
