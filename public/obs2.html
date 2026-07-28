@@ -24,25 +24,19 @@
             width: 150px; height: 150px; position: absolute; left: 0; top: -50px;
             display: flex; align-items: center; justify-content: center;
         }
-        /* DÖRT BİR YANINDAN EŞİT PARLAYAN MAVİ/CYAN IŞIK EFEKTİ */
         .tl-cropped-logo img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: contain; 
+            width: 100%; height: 100%; object-fit: contain; 
             filter: drop-shadow(0 0 10px var(--neon-cyan)) drop-shadow(0 0 20px rgba(0, 229, 255, 0.6)); 
         }
         
         #bottom-center-spectate {
             position: absolute; left: 36%; bottom: 141px; transform: translateX(-50%); display: none; align-items: center; justify-content: center;
             background: #000000; border: 2px solid var(--neon-cyan); border-radius: 8px; width: 75px; height: 75px;
-            /* DÖRT BİR YANINDAN ÇEVRESEL MAVİ/CYAN PARILTI KUTUSU */
-            box-shadow: 0 0 25px rgba(0, 229, 255, 0.6), inset 0 0 12px rgba(0, 229, 255, 0.4); 
-            opacity: 1; z-index: 100;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.6), inset 0 0 12px rgba(0, 229, 255, 0.4); opacity: 1; z-index: 100;
         }
         .bc-logo { width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; }
         .bc-logo img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.5)); }
 
-        /* ÜST ORTA ELENME / ÖZEL TASARIM KUTUSU */
         #eliminated-alert-box {
             position: absolute; left: 50%; top: 90px; transform: translateX(-50%); display: none; flex-direction: column; align-items: center;
             background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), var(--dark-bg) 60%);
@@ -65,24 +59,19 @@
         .ea-stat-val { color: var(--neon-cyan); font-weight: 900; }
 
         #match-info-box {
-            position: absolute; left: 30px; bottom: 45px; 
-            display: flex; align-items: center;
+            position: absolute; left: 30px; bottom: 45px; display: flex; align-items: center;
             z-index: 90; transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .mi-logo-area {
-            width: 75px; height: 75px; margin-right: 20px;
-            display: flex; align-items: center; justify-content: center;
-            background: transparent; border: none; box-shadow: none; flex-shrink: 0;
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+            width: 75px; height: 75px; margin-right: 20px; display: flex; align-items: center; justify-content: center;
+            background: transparent; border: none; box-shadow: none; flex-shrink: 0; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
         }
         .mi-logo-area img { width: 100%; height: 100%; object-fit: contain; }
         
         .mi-text-wrap { 
-            display: flex; flex-direction: column; 
-            background: var(--dark-bg);
+            display: flex; flex-direction: column; background: var(--dark-bg);
             padding: 10px 30px 10px 20px; border-left: 4px solid var(--neon-cyan);
-            border-radius: 0 12px 12px 0;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+            border-radius: 0 12px 12px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.8);
         }
         .mi-tour { font-size: 0.9rem; font-weight: 900; color: var(--neon-cyan); letter-spacing: 3px; text-transform: uppercase; }
         .mi-match { font-size: 1.7rem; font-weight: 900; color: #ffffff; letter-spacing: 1px; text-transform: uppercase; line-height: 1.1; margin-top: 2px; }
@@ -95,14 +84,10 @@
         .marquee-track { display: flex; gap: 60px; white-space: nowrap; animation: scrollMarquee 40s linear infinite; }
         @keyframes scrollMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         .marquee-item { display: flex; align-items: center; gap: 12px; font-size: 1.1rem; font-weight: 700; color: #d4d4d8; text-transform: uppercase; letter-spacing: 2px; }
-        .marquee-logo { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
-        .marquee-logo img { width: 100%; height: 100%; object-fit: contain; }
-
+        
         #leaderboard-box {
-            position: absolute; right: 0; bottom: 32px; width: 370px; 
-            background: #000000;
-            border-top: 3px solid var(--neon-cyan);
-            border-left: 1px solid var(--glass-border);
+            position: absolute; right: 0; bottom: 32px; width: 370px; background: #000000;
+            border-top: 3px solid var(--neon-cyan); border-left: 1px solid var(--glass-border);
             border-radius: 16px 0 0 0; overflow: hidden;
             box-shadow: -15px -15px 50px rgba(0, 0, 0, 1), 0 0 30px rgba(0, 229, 255, 0.15);
             transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -116,28 +101,34 @@
         .lb-row {
             display: flex; align-items: center; padding: 0 15px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            font-size: 1rem; font-weight: 700; height: 70px; box-sizing: border-box;
-            background: #000000;
-            transition: all 0.3s;
+            font-size: 1rem; font-weight: 700; height: 34px; box-sizing: border-box; background: #000000; transition: all 0.3s;
         }
         .lb-row:last-child { border-bottom: none; }
 
-        .lb-row.eliminated {
-            background: #111115 !important;
-            opacity: 0.45;
-            filter: grayscale(80%);
-        }
-        .lb-row.eliminated .lb-name,
-        .lb-row.eliminated .lb-rank,
-        .lb-row.eliminated .lb-pts {
-            color: #9ca3af !important;
-            text-shadow: none !important;
-        }
+        .lb-row.eliminated { background: #111115 !important; opacity: 0.45; filter: grayscale(80%); }
+        .lb-row.eliminated .lb-name, .lb-row.eliminated .lb-rank, .lb-row.eliminated .lb-pts { color: #9ca3af !important; text-shadow: none !important; }
         
         .lb-rank { width: 30px; color: var(--neon-cyan); font-weight: 900; flex-shrink: 0; font-size: 1.1rem; }
-        .lb-logo { width: 20px; height: 20px; margin-right: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .lb-logo img { width: 100%; height: 100%; object-fit: contain; }
         
+        /* LOGO & BAYRAK ANİMASYONLARI (8 Saniyelik Döngü: 4sn Biri, 4sn Diğeri) */
+        .lb-logo-container { position: relative; width: 20px; height: 20px; margin-right: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .lb-logo-img, .lb-flag-img { position: absolute; width: 100%; height: 100%; object-fit: contain; }
+        
+        /* Çapraz Geçiş Animasyonu: 8 saniyelik toplam sürenin %40'ı sabit, %10'u geçiş efekti */
+        .animated-logo { animation: fadeLogo 8s infinite linear; }
+        .animated-flag { animation: fadeFlag 8s infinite linear; opacity: 0; }
+
+        @keyframes fadeLogo {
+            0%, 40% { opacity: 1; }
+            50%, 90% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        @keyframes fadeFlag {
+            0%, 40% { opacity: 0; }
+            50%, 90% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
         .lb-name { flex-grow: 1; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; color: #ffffff; letter-spacing: 0.5px; }
         
         .lb-alive { width: 60px; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0; }
@@ -160,7 +151,7 @@
         </div>
     </div>
 
-    <!-- YAYIN ÜST ORTA KISIMDA ÇIKACAK ELENME / BİLGİ KUTUSU -->
+    <!-- ELENME / BİLGİ KUTUSU -->
     <div id="eliminated-alert-box">
         <div class="ea-title">⚡ SQUAD ELIMINATED ⚡</div>
         <div class="ea-content">
@@ -191,113 +182,75 @@
     <script>
         const socket = io();
 
-        let globalAlive = {};
-        let globalManualStatus = {};
-        let globalLogos = {};
-        let globalDefaultLogo = ""; 
-        let globalLeaderboard = [];
-        let allRegisteredTeams = [];
-        let alertTimeout = null;
-        let showAliveGlobal = true;
-        let showMarqueeGlobal = true;
+        let globalAlive = {}; let globalManualStatus = {};
+        let globalLogos = {}; let globalDefaultLogo = ""; 
+        let globalFlags = {}; let globalDefaultFlag = ""; 
+        let globalLeaderboard = []; let allRegisteredTeams = []; let alertTimeout = null;
+        let showAliveGlobal = true; let showMarqueeGlobal = true;
 
         socket.on('liveUpdate', (data) => {
             if (data.settings) {
-                document.getElementById('tourName').innerText = data.settings.tournamentName || '';
-                document.getElementById('matchName').innerText = data.settings.currentMatch || '';
-                if (data.settings.showAlive !== undefined) {
-                    showAliveGlobal = data.settings.showAlive;
-                    updateHeaderAliveState();
-                }
-                if (data.settings.showMarquee !== undefined) {
-                    showMarqueeGlobal = data.settings.showMarquee;
-                    applyMarqueeVisibility();
-                }
+                document.getElementById('tourName').innerText = data.settings.tournamentName || ''; document.getElementById('matchName').innerText = data.settings.currentMatch || '';
+                if (data.settings.showAlive !== undefined) { showAliveGlobal = data.settings.showAlive; updateHeaderAliveState(); }
+                if (data.settings.showMarquee !== undefined) { showMarqueeGlobal = data.settings.showMarquee; applyMarqueeVisibility(); }
             }
             if (data.teams) allRegisteredTeams = data.teams;
             if (data.alive) globalAlive = data.alive;
             if (data.manualStatus) globalManualStatus = data.manualStatus;
+            
             if (data.logos) globalLogos = { ...globalLogos, ...data.logos };
+            if (data.flags) globalFlags = { ...globalFlags, ...data.flags };
             if (data.defaultLogo !== undefined) globalDefaultLogo = data.defaultLogo; 
+            if (data.defaultFlag !== undefined) globalDefaultFlag = data.defaultFlag; 
             
             if (data.leaderboard) {
                 globalLeaderboard = data.leaderboard;
                 globalLeaderboard.forEach(t => { if(!allRegisteredTeams.includes(t.teamName)) allRegisteredTeams.push(t.teamName); });
-                renderLeaderboard();
-                updateMarquee();
+                renderLeaderboard(); updateMarquee();
             }
         });
 
-        socket.on('tourLogoUpdate', (data) => {
-            const wrap = document.getElementById('tourLogoWrap');
-            wrap.innerHTML = data.tournamentLogo ? `<img src="${data.tournamentLogo}">` : ``;
-        });
-
-        socket.on('defaultLogoUpdate', (data) => {
-            globalDefaultLogo = data.defaultLogo;
-            renderLeaderboard();
-            updateMarquee();
-        });
+        socket.on('tourLogoUpdate', (data) => { document.getElementById('tourLogoWrap').innerHTML = data.tournamentLogo ? `<img src="${data.tournamentLogo}">` : ``; });
+        socket.on('defaultLogoUpdate', (data) => { globalDefaultLogo = data.defaultLogo; renderLeaderboard(); updateMarquee(); });
+        socket.on('defaultFlagUpdate', (data) => { globalDefaultFlag = data.defaultFlag; renderLeaderboard(); updateMarquee(); });
+        
+        socket.on('logoUpdate', (data) => { if(data.logos) globalLogos = { ...globalLogos, ...data.logos }; renderLeaderboard(); updateMarquee(); });
+        socket.on('flagUpdate', (data) => { if(data.flags) globalFlags = { ...globalFlags, ...data.flags }; renderLeaderboard(); updateMarquee(); });
 
         socket.on('aliveUpdate', (data) => { globalAlive = data.alive; renderLeaderboard(); });
         socket.on('manualStatusUpdate', (data) => { globalManualStatus = data.manualStatus; renderLeaderboard(); });
         socket.on('triggerAlert', (data) => { showEliminatedAlert(data.team); });
 
-        socket.on('logoUpdate', (data) => { 
-            if(data.logos) globalLogos = { ...globalLogos, ...data.logos }; 
-            renderLeaderboard(); 
-            updateMarquee(); 
-        });
-
         function applyMarqueeVisibility() {
-            const bar = document.getElementById('bottom-marquee-bar');
-            const matchBox = document.getElementById('match-info-box');
-            const lbBox = document.getElementById('leaderboard-box');
-
+            const bar = document.getElementById('bottom-marquee-bar'); const matchBox = document.getElementById('match-info-box'); const lbBox = document.getElementById('leaderboard-box');
             if (showMarqueeGlobal) {
-                if(bar) bar.style.display = 'flex';
-                if(matchBox) matchBox.style.bottom = '45px';
-                if(lbBox) lbBox.style.bottom = '32px';      
+                if(bar) bar.style.display = 'flex'; if(matchBox) matchBox.style.bottom = '45px'; if(lbBox) lbBox.style.bottom = '32px';      
             } else {
-                if(bar) bar.style.display = 'none';
-                if(matchBox) matchBox.style.bottom = '15px';
-                if(lbBox) lbBox.style.bottom = '0px';      
+                if(bar) bar.style.display = 'none'; if(matchBox) matchBox.style.bottom = '15px'; if(lbBox) lbBox.style.bottom = '0px';      
             }
         }
 
         function updateHeaderAliveState() {
             const sub = document.getElementById('lbHeaderSub');
-            if(sub) {
-                sub.innerHTML = showAliveGlobal 
-                    ? `<div style="width: 60px; text-align: center;">ALV</div><div style="width: 40px; text-align: center;">KLS</div><div style="width: 40px; text-align: right;">PTS</div>` 
-                    : `<div style="width: 40px; text-align: center;">KLS</div><div style="width: 40px; text-align: right;">PTS</div>`;
-            }
+            if(sub) { sub.innerHTML = showAliveGlobal ? `<div style="width: 60px; text-align: center;">ALV</div><div style="width: 40px; text-align: center;">KLS</div><div style="width: 40px; text-align: right;">PTS</div>` : `<div style="width: 40px; text-align: center;">KLS</div><div style="width: 40px; text-align: right;">PTS</div>`; }
         }
 
         function showEliminatedAlert(teamName) {
-            const alertBox = document.getElementById('eliminated-alert-box');
-            document.getElementById('eliminatedTeamName').innerText = teamName;
-
+            const alertBox = document.getElementById('eliminated-alert-box'); document.getElementById('eliminatedTeamName').innerText = teamName;
             let foundTeam = globalLeaderboard.find(item => item.teamName === teamName);
-            document.getElementById('eaKills').innerText = foundTeam ? (foundTeam.kills || 0) : 0;
-            document.getElementById('eaPts').innerText = foundTeam ? (foundTeam.score || 0) : 0;
+            document.getElementById('eaKills').innerText = foundTeam ? (foundTeam.kills || 0) : 0; document.getElementById('eaPts').innerText = foundTeam ? (foundTeam.score || 0) : 0;
 
-            const logoWrap = document.getElementById('eaLogoWrap');
-            let logo = globalLogos[teamName] || globalDefaultLogo || "";
+            const logoWrap = document.getElementById('eaLogoWrap'); let logo = globalLogos[teamName] || globalDefaultLogo || "";
             logoWrap.innerHTML = logo ? `<img src="${logo}">` : `<span style="font-size:1.2rem;">⚡</span>`;
 
-            alertBox.style.display = 'flex';
-            alertBox.style.animation = 'none';
-            alertBox.offsetHeight; 
+            alertBox.style.display = 'flex'; alertBox.style.animation = 'none'; alertBox.offsetHeight; 
             alertBox.style.animation = 'slideDownAlert 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, pulseCyan 2s infinite alternate';
-
-            if (alertTimeout) clearTimeout(alertTimeout);
-            alertTimeout = setTimeout(() => { alertBox.style.display = 'none'; }, 5000);
+            if (alertTimeout) clearTimeout(alertTimeout); alertTimeout = setTimeout(() => { alertBox.style.display = 'none'; }, 5000);
         }
 
+        // MARQUEE (KAYAN YAZI) İÇİN ÇAPRAZ GEÇİŞ UYARLAMASI
         function updateMarquee() {
-            const track = document.getElementById('marqueeTrack');
-            if(!track) return;
+            const track = document.getElementById('marqueeTrack'); if(!track) return;
             let teamsList = globalLeaderboard.map(t => t.teamName);
             allRegisteredTeams.forEach(team => { if(!teamsList.includes(team)) teamsList.push(team); });
 
@@ -307,60 +260,69 @@
             for(let loop = 0; loop < 2; loop++) {
                 teamsList.forEach(team => {
                     let teamLogo = globalLogos[team] || globalDefaultLogo || "";
-                    let logo = teamLogo ? `<div class="marquee-logo"><img src="${teamLogo}"></div>` : ``;
-                    itemsHTML += `<div class="marquee-item">${logo}<span>${team}</span></div><span style="color: var(--neon-cyan);">/</span>`;
+                    let teamFlag = globalFlags[team] || globalDefaultFlag || "";
+                    
+                    let visualHTML = "";
+                    if (teamLogo && teamFlag) {
+                        visualHTML = `<div class="lb-logo-container"><img src="${teamLogo}" class="lb-logo-img animated-logo"><img src="${teamFlag}" class="lb-flag-img animated-flag"></div>`;
+                    } else if (teamLogo) {
+                        visualHTML = `<div class="lb-logo-container"><img src="${teamLogo}" class="lb-logo-img"></div>`;
+                    } else if (teamFlag) {
+                        visualHTML = `<div class="lb-logo-container"><img src="${teamFlag}" class="lb-logo-img"></div>`;
+                    }
+
+                    itemsHTML += `<div class="marquee-item">${visualHTML}<span>${team}</span></div><span style="color: var(--neon-cyan);">/</span>`;
                 });
             }
             track.innerHTML = itemsHTML;
         }
 
         function renderLeaderboard() {
-            const lbBody = document.getElementById('lb-body');
-            lbBody.innerHTML = '';
+            const lbBody = document.getElementById('lb-body'); lbBody.innerHTML = '';
             
             let combinedList = [...globalLeaderboard];
-            allRegisteredTeams.forEach(team => {
-                if (!combinedList.some(item => item.teamName === team)) combinedList.push({ teamName: team, score: 0, kills: 0, wins: 0 });
-            });
+            allRegisteredTeams.forEach(team => { if (!combinedList.some(item => item.teamName === team)) combinedList.push({ teamName: team, score: 0, kills: 0, wins: 0 }); });
 
             for(let idx = 0; idx < 18; idx++) {
-                let t = combinedList[idx];
-                let rankNum = idx + 1;
-
+                let t = combinedList[idx]; let rankNum = idx + 1;
                 if (!t) {
                     let emptyAlive = showAliveGlobal ? `<div class="lb-alive"></div>` : ``;
-                    lbBody.innerHTML += `<div class="lb-row" style="opacity: 0.1;"><span class="lb-rank">#${rankNum}</span><div class="lb-logo"></div><span class="lb-name">-</span>${emptyAlive}<span class="lb-kills">-</span><span class="lb-pts">-</span></div>`;
+                    lbBody.innerHTML += `<div class="lb-row" style="opacity: 0.1;"><span class="lb-rank">#${rankNum}</span><div class="lb-logo-container"></div><span class="lb-name">-</span>${emptyAlive}<span class="lb-kills">-</span><span class="lb-pts">-</span></div>`;
                     continue;
                 }
 
-                let teamAlive = globalAlive[t.teamName] || [3,3,3,3];
-                let manualDead = globalManualStatus[t.teamName] || false;
-                let teamLogo = globalLogos[t.teamName] || globalDefaultLogo || "";
-                let aliveBarsHTML = "";
+                let teamAlive = globalAlive[t.teamName] || [3,3,3,3]; let manualDead = globalManualStatus[t.teamName] || false;
                 
+                let teamLogo = globalLogos[t.teamName] || globalDefaultLogo || "";
+                let teamFlag = globalFlags[t.teamName] || globalDefaultFlag || "";
+                
+                let aliveBarsHTML = "";
                 let isCompletelyDead = showAliveGlobal ? teamAlive.every(status => status === 1) : manualDead;
 
                 if (showAliveGlobal) {
                     teamAlive.forEach(status => {
-                        let cls = "alive-bar";
-                        if(status === 2) cls += " yellow";
-                        if(status === 1) cls += " dead";
+                        let cls = "alive-bar"; if(status === 2) cls += " yellow"; if(status === 1) cls += " dead";
                         aliveBarsHTML += `<div class="${cls}"></div>`;
                     });
                 }
 
-                let logoHTML = teamLogo ? `<div class="lb-logo"><img src="${teamLogo}"></div>` : `<div class="lb-logo"></div>`;
-                let aliveTd = showAliveGlobal ? `<div class="lb-alive">${aliveBarsHTML}</div>` : ``;
-
-                let rowClasses = "lb-row";
-                if (isCompletelyDead) {
-                    rowClasses += " eliminated";
+                // EĞER HEM LOGO HEM BAYRAK VARSA ÇAPRAZ GEÇİŞ ANİMASYONUNU KULLAN (animated sınıfları ekleniyor)
+                let visualHTML = `<div class="lb-logo-container"></div>`;
+                if (teamLogo && teamFlag) {
+                    visualHTML = `<div class="lb-logo-container"><img src="${teamLogo}" class="lb-logo-img animated-logo"><img src="${teamFlag}" class="lb-flag-img animated-flag"></div>`;
+                } else if (teamLogo) {
+                    visualHTML = `<div class="lb-logo-container"><img src="${teamLogo}" class="lb-logo-img"></div>`;
+                } else if (teamFlag) {
+                    visualHTML = `<div class="lb-logo-container"><img src="${teamFlag}" class="lb-logo-img"></div>`;
                 }
+
+                let aliveTd = showAliveGlobal ? `<div class="lb-alive">${aliveBarsHTML}</div>` : ``;
+                let rowClasses = isCompletelyDead ? "lb-row eliminated" : "lb-row";
 
                 lbBody.innerHTML += `
                     <div class="${rowClasses}">
                         <span class="lb-rank">#${rankNum}</span>
-                        ${logoHTML}
+                        ${visualHTML}
                         <span class="lb-name">${t.teamName}</span>
                         ${aliveTd}
                         <span class="lb-kills">${t.kills || 0}</span>
@@ -371,29 +333,21 @@
         }
 
         socket.on('spectateUpdate', (data) => {
-            const team = data.team;
-            const logo = data.logo || "";
-            const topLeftBox = document.getElementById('top-left-spectate');
-            const bottomCenterBox = document.getElementById('bottom-center-spectate');
-
-            if (!team || team === null || team === "" || team.trim() === "") { 
-                topLeftBox.style.display = 'none'; 
-                bottomCenterBox.style.display = 'none';
-                document.getElementById('tlCroppedLogoArea').innerHTML = '';
-                document.getElementById('bcLogoArea').innerHTML = '';
+            const team = data.team; const logo = data.logo || "";
+            const topLeftBox = document.getElementById('top-left-spectate'); const bottomCenterBox = document.getElementById('bottom-center-spectate');
+            if (!team || team.trim() === "") { 
+                topLeftBox.style.display = 'none'; bottomCenterBox.style.display = 'none';
+                document.getElementById('tlCroppedLogoArea').innerHTML = ''; document.getElementById('bcLogoArea').innerHTML = '';
                 return; 
             }
-            
-            topLeftBox.style.display = 'block'; 
-            bottomCenterBox.style.display = 'flex';
+            topLeftBox.style.display = 'block'; bottomCenterBox.style.display = 'flex';
             document.getElementById('tlCroppedLogoArea').innerHTML = logo ? `<img src="${logo}">` : `<span class="tl-fallback-text">${team.substring(0,3)}</span>`;
             document.getElementById('bcLogoArea').innerHTML = logo ? `<img src="${logo}">` : `<span class="bc-fallback">${team.substring(0,3)}</span>`;
         });
 
         fetch(`/api/data`).then(res => res.json()).then(data => {
             if(data.settings) {
-                document.getElementById('tourName').innerText = data.settings.tournamentName || '';
-                document.getElementById('matchName').innerText = data.settings.currentMatch || '';
+                document.getElementById('tourName').innerText = data.settings.tournamentName || ''; document.getElementById('matchName').innerText = data.settings.currentMatch || '';
                 if(data.settings.showAlive !== undefined) showAliveGlobal = data.settings.showAlive;
                 if(data.settings.showMarquee !== undefined) { showMarqueeGlobal = data.settings.showMarquee; applyMarqueeVisibility(); }
             }
@@ -403,20 +357,17 @@
             if(data.teams) allRegisteredTeams = data.teams;
             if(data.alive) globalAlive = data.alive;
             if(data.manualStatus) globalManualStatus = data.manualStatus;
+            
             if(data.logos) globalLogos = data.logos;
+            if(data.flags) globalFlags = data.flags;
             if(data.defaultLogo) globalDefaultLogo = data.defaultLogo; 
+            if(data.defaultFlag) globalDefaultFlag = data.defaultFlag; 
             
             if(data.leaderboard) { globalLeaderboard = data.leaderboard; renderLeaderboard(); }
             updateMarquee();
             
-            if(data.spectating && data.spectating.trim() !== "") {
-                socket.emit('setSpectate', { teamName: data.spectating });
-            } else {
-                document.getElementById('top-left-spectate').style.display = 'none';
-                document.getElementById('bottom-center-spectate').style.display = 'none';
-                document.getElementById('tlCroppedLogoArea').innerHTML = '';
-                document.getElementById('bcLogoArea').innerHTML = '';
-            }
+            if(data.spectating && data.spectating.trim() !== "") { socket.emit('setSpectate', { teamName: data.spectating }); } 
+            else { document.getElementById('top-left-spectate').style.display = 'none'; document.getElementById('bottom-center-spectate').style.display = 'none'; document.getElementById('tlCroppedLogoArea').innerHTML = ''; document.getElementById('bcLogoArea').innerHTML = ''; }
         });
     </script>
 </body>

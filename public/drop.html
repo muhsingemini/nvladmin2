@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NVL Drop Phase Overlay</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-cyan: #00e5ff;
+            --dark-bg: #030712;
+            --glass-bg: rgba(0, 0, 0, 0.7);
+        }
+
+        body { 
+            margin: 0; padding: 0; background: transparent; 
+            font-family: 'Rajdhani', sans-serif; overflow: hidden; 
+            width: 1920px; height: 1080px; position: relative;
+        }
+
+        /* ARKA PLAN MASKESİ (Gameloop pencereleri şeffaf kalır) */
+        .bg-svg {
+            position: absolute; top: 0; left: 0; z-index: -10;
+        }
+
+        /* CANLI YAYIN GÖSTERGESİ */
+        #live-indicator {
+            position: absolute; top: 40px; left: 40px; display: flex; align-items: center; gap: 10px;
+            font-size: 1.5rem; font-weight: 900; color: #ffffff; letter-spacing: 3px; z-index: 999;
+            background: var(--glass-bg); padding: 8px 20px; border-radius: 8px; border-left: 3px solid #ef4444;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .live-dot {
+            width: 14px; height: 14px; background-color: #ef4444; border-radius: 50%;
+            box-shadow: 0 0 10px #ef4444, 0 0 20px #ef4444; animation: blinkRed 1.5s infinite ease-in-out;
+        }
+        @keyframes blinkRed { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+
+        /* GENEL ÇERÇEVELER */
+        .frame-wrapper {
+            position: absolute; background: transparent;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 229, 255, 0.1);
+        }
+        .frame-wrapper::before, .frame-wrapper::after {
+            content: ''; position: absolute; width: 30px; height: 30px; border: 3px solid var(--neon-cyan); z-index: 10; pointer-events: none;
+        }
+        .frame-wrapper::before { top: -3px; left: -3px; border-right: none; border-bottom: none; box-shadow: -2px -2px 10px rgba(0,229,255,0.4); }
+        .frame-wrapper::after { bottom: -3px; right: -3px; border-left: none; border-top: none; box-shadow: 2px 2px 10px rgba(0,229,255,0.4); }
+        .frame-border { position: absolute; inset: 0; border: 1px solid rgba(0, 229, 255, 0.3); pointer-events: none; }
+        
+        .frame-header {
+            position: absolute; top: -45px; left: -1px; height: 45px;
+            background: linear-gradient(90deg, rgba(0, 229, 255, 0.9) 0%, rgba(0, 0, 0, 0.8) 100%);
+            display: flex; align-items: center; padding: 0 25px; color: #fff; font-size: 1.4rem; font-weight: 900;
+            letter-spacing: 2px; text-transform: uppercase; border-top: 2px solid var(--neon-cyan);
+            border-left: 2px solid var(--neon-cyan); border-radius: 8px 0 0 0; min-width: 250px;
+            clip-path: polygon(0 0, 100% 0, 90% 100%, 0 100%); text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        #drop-cam-container { bottom: 60px; left: 60px; width: 960px; height: 540px; border-bottom: 3px solid var(--neon-cyan); border-left: 3px solid var(--neon-cyan); }
+        #map-container { top: 100px; right: 60px; width: 700px; height: 700px; border-top: 3px solid var(--neon-cyan); border-right: 3px solid var(--neon-cyan); }
+
+        /* =========================================================
+           SOL ÜST LOGO VİTRİNİ (14 TAKIM)
+           ========================================================= */
+        #featured-logos-wrapper {
+            position: absolute;
+            top: 130px;
+            left: 60px;
+            width: 1000px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            z-index: 50;
+        }
+
+        .team-logo-card {
+            width: 120px;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            box-sizing: border-box;
+            box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.05), 0 15px 25px rgba(0,0,0,0.8);
+            position: relative;
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        .team-logo-card::before {
+            content: ''; position: absolute; top: -1px; left: -1px; width: 20px; height: 20px;
+            border-top: 3px solid var(--neon-cyan); border-left: 3px solid var(--neon-cyan); border-radius: 16px 0 0 0;
+        }
+        .team-logo-card::after {
+            content: ''; position: absolute; bottom: -1px; right: -1px; width: 20px; height: 20px;
+            border-bottom: 3px solid var(--neon-cyan); border-right: 3px solid var(--neon-cyan); border-radius: 0 0 16px 0;
+        }
+
+        .team-logo-card img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.3));
+        }
+
+        .team-name-tag {
+            position: absolute;
+            bottom: -12px;
+            background: var(--neon-cyan);
+            color: #000;
+            font-size: 0.8rem;
+            font-weight: 900;
+            padding: 2px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            max-width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+        }
+
+        @keyframes popIn {
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* =========================================================
+           SAĞ ALT BİLGİ METNİ (SADECE NVL ORGANIZATION)
+           ========================================================= */
+        #bottom-right-info {
+            position: absolute;
+            bottom: 60px;
+            right: 60px;
+            width: 700px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            z-index: 50;
+        }
+
+        .org-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.9), 0 0 20px rgba(0, 229, 255, 0.2);
+            line-height: 0.9;
+        }
+        .org-title span { color: var(--neon-cyan); }
+
+    </style>
+</head>
+<body>
+
+    <!-- SVG MASKESİ (GAMELOOP DELİKLERİ VE SİYAH ARKA PLAN) -->
+    <svg class="bg-svg" width="1920" height="1080">
+        <defs>
+            <pattern id="gridPattern" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0, 229, 255, 0.05)" stroke-width="1"/>
+            </pattern>
+            <mask id="holeMask">
+                <rect width="1920" height="1080" fill="white" />
+                <rect x="60" y="480" width="960" height="540" fill="black" />
+                <rect x="1160" y="100" width="700" height="700" fill="black" />
+            </mask>
+        </defs>
+        <rect width="1920" height="1080" fill="#030712" mask="url(#holeMask)" />
+        <rect width="1920" height="1080" fill="url(#gridPattern)" mask="url(#holeMask)" />
+    </svg>
+
+    <div id="live-indicator">
+        <div class="live-dot"></div>
+        <span>LIVE</span>
+    </div>
+
+    <!-- 14 TAKIM LOGO VİTRİNİ -->
+    <div id="featured-logos-wrapper"></div>
+
+    <!-- SAĞ ALT ORGANİZASYON KÜNYESİ (SADECE NVL ORGANIZATION) -->
+    <div id="bottom-right-info">
+        <div class="org-title">NVL <span>ORGANIZATION</span></div>
+    </div>
+
+    <!-- DROP CAM ÇERÇEVESİ -->
+    <div class="frame-wrapper" id="drop-cam-container">
+        <div class="frame-header">🪂 DROP CAM</div>
+        <div class="frame-border"></div>
+    </div>
+
+    <!-- HARİTA ÇERÇEVESİ -->
+    <div class="frame-wrapper" id="map-container">
+        <div class="frame-header" style="background: linear-gradient(90deg, rgba(0, 229, 255, 0.9) 0%, rgba(0, 0, 0, 0.8) 100%);">📍 TACTICAL MAP</div>
+        <div class="frame-border"></div>
+    </div>
+
+    <script>
+        const socket = io();
+
+        let globalTeams = [];
+        let globalLogos = {};
+        let globalDefaultLogo = "";
+
+        function renderFeaturedLogos() {
+            const wrapper = document.getElementById('featured-logos-wrapper');
+            wrapper.innerHTML = ''; 
+
+            let customLogoTeams = [];
+            let defaultLogoTeams = [];
+
+            // Takımları özel logosu olanlar ve varsayılan kullananlar olarak ayır
+            globalTeams.forEach(team => {
+                if (globalLogos[team] && globalLogos[team].trim() !== '') {
+                    customLogoTeams.push(team);
+                } else {
+                    defaultLogoTeams.push(team);
+                }
+            });
+
+            // Birleştir: Önce özel logolar, ardından yetmezse varsayılanlar
+            let combinedTeams = [...customLogoTeams, ...defaultLogoTeams];
+
+            // En fazla 14 takım göster (2 satır, 7 sütun)
+            let displayTeams = combinedTeams.slice(0, 14);
+
+            displayTeams.forEach((team, index) => {
+                const delay = index * 0.1; // Kartlar sırayla tek tek belirsin
+                let logoSrc = globalLogos[team] || globalDefaultLogo;
+                
+                // Eğer takımın özel logosu da yok, varsayılan logo da admin panelden yüklenmemişse boş geçme, metin yaz
+                let imgHTML = logoSrc 
+                    ? `<img src="${logoSrc}" alt="${team}">` 
+                    : `<span style="color:#555; font-size:12px; font-weight:bold;">${team}</span>`;
+                
+                wrapper.innerHTML += `
+                    <div class="team-logo-card" style="animation-delay: ${delay}s;">
+                        ${imgHTML}
+                        <div class="team-name-tag">${team}</div>
+                    </div>
+                `;
+            });
+        }
+
+        // Sunucudan Veri Dinle
+        socket.on('liveUpdate', (data) => {
+            if (data.teams) globalTeams = data.teams;
+            if (data.logos) globalLogos = data.logos;
+            if (data.defaultLogo !== undefined) globalDefaultLogo = data.defaultLogo;
+            renderFeaturedLogos();
+        });
+
+        socket.on('logoUpdate', (data) => {
+            if (data.logos) globalLogos = data.logos;
+            renderFeaturedLogos();
+        });
+
+        socket.on('defaultLogoUpdate', (data) => {
+            if (data.defaultLogo !== undefined) globalDefaultLogo = data.defaultLogo;
+            renderFeaturedLogos();
+        });
+
+        // İlk Yüklemede Veriyi Çek
+        fetch('/api/data').then(res => res.json()).then(data => {
+            if (data.teams) globalTeams = data.teams;
+            if (data.logos) globalLogos = data.logos;
+            if (data.defaultLogo) globalDefaultLogo = data.defaultLogo;
+            renderFeaturedLogos();
+        });
+    </script>
+</body>
+</html>
